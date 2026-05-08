@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>provider.4 — EXIF ULTIMATE</title>
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════ TEMA VE ŞIK GİRİŞ EKRANI ══════════════ */
+:root{
+  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--border:rgba(255,255,255,0.07);
+  --accent:#00ff88;--text:#fff;--text2:#888;--danger:#ff3355;--mono:'Space Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
+
+#loginScreen {
+    position:fixed; inset:0; background:var(--bg); z-index:10000;
+    display:flex; align-items:center; justify-content:center;
+    background-image: radial-gradient(circle at 50% 50%, #0a1510 0%, #000 100%);
+}
+.login-card {
+    width:100%; max-width:380px; background:rgba(13,13,13,0.8); border:1px solid var(--border);
+    padding:48px 32px; border-radius:32px; text-align:center; backdrop-filter: blur(20px);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.5);
+}
+.login-logo { font-family:var(--mono); color:var(--accent); letter-spacing:6px; font-size:14px; margin-bottom:12px; font-weight:800; }
+.login-title { font-size:28px; font-weight:800; margin-bottom:32px; letter-spacing:-1px; }
+
+.input-group { margin-bottom:16px; text-align:left; }
+.input-label { font-size:10px; font-family:var(--mono); color:var(--text2); margin-left:12px; margin-bottom:6px; display:block; text-transform:uppercase; letter-spacing:1px; }
+
+.login-input {
+    width:100%; background:var(--surf2); border:1px solid var(--border);
+    border-radius:16px; color:#fff; padding:16px; font-family:var(--mono);
+    outline:none; transition:0.3s; text-align:center; font-size:14px;
+}
+.login-input:focus { border-color:var(--accent); background:var(--surf3); box-shadow: 0 0 0 4px rgba(0,255,136,0.05); }
+
+.login-btn {
+    width:100%; background:var(--accent); color:#000; border:none;
+    padding:18px; border-radius:16px; font-weight:900; cursor:pointer;
+    margin-top:12px; transition:0.3s; letter-spacing:1px;
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,255,136,0.2); }
+
+/* ══════════════ EXIF ARAÇLARI (ORİJİNAL) ══════════════ */
+.app-container { display:none; max-width:900px; margin:0 auto; padding:40px 20px; opacity:0; transition:0.5s; }
+.authorized { display:block; opacity:1; }
+
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; }
+#dropZone {
+    background:var(--surf); border:2px dashed var(--border); border-radius:24px;
+    padding:80px 20px; text-align:center; cursor:pointer; transition:0.3s;
+}
+#dropZone:hover { border-color:var(--accent); background:rgba(0,255,136,0.02); }
+
+.forgery-card {
+    background:rgba(255,51,85,0.05); border:1px solid var(--danger);
+    padding:20px; border-radius:20px; margin:24px 0; display:none;
+}
+.ai-card {
+    background:var(--surf); border:1px solid var(--border); padding:24px;
+    border-radius:20px; margin:24px 0;
+}
+.meta-table { width:100%; border-collapse:collapse; margin-top:20px; }
+.meta-table td { padding:14px; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:13px; }
+.meta-key { color:var(--text2); width:40%; }
+.meta-val { color:var(--accent); text-align:right; word-break:break-all; }
+
+.btn-row { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+.tool-btn {
+    background:var(--surf2); color:var(--text); border:1px solid var(--border);
+    padding:10px 20px; border-radius:12px; cursor:pointer; font-size:12px; font-weight:600;
+}
+.tool-btn:hover { border-color:var(--accent); color:var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">PROVIDER.4</div>
+        <h1 class="login-title">Sistem Erişimi</h1>
+        
+        <div class="input-group">
+            <span class="input-label">Kullanıcı Adı</span>
+            <input type="text" id="loginUser" class="login-input" placeholder="Kullanıcı adınızı girin">
+        </div>
+
+        <div class="input-group">
+            <span class="input-label">Erişim Anahtarı</span>
+            <input type="password" id="loginKey" class="login-input" placeholder="••••-••••-••••">
+        </div>
+
+        <button class="login-btn" onclick="checkAccess()">OTURUM AÇ</button>
+        <p id="status" style="margin-top:20px; font-size:12px; color:#444; font-family:var(--mono);"></p>
+    </div>
+</div>
+
+<div class="app-container" id="mainApp">
+    <div class="header">
+        <h2 style="font-weight:800; letter-spacing:-1px;">EXIF <span style="color:var(--accent)">ANALYZER</span></h2>
+        <div id="userBadge" style="font-family:var(--mono); font-size:12px; color:var(--accent)"></div>
+    </div>
+
+    <div id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:48px; margin-bottom:16px;">📸</div>
+        <h3 style="font-size:20px;">Görseli Buraya Bırakın</h3>
+        <p style="color:var(--text2); margin-top:8px;">Veya seçmek için tıklayın</p>
+        <input type="file" id="fileInput" hidden accept="image/*" onchange="processFile(this.files[0])">
+    </div>
+
+    <div id="forgeryAlert" class="forgery-card">
+        <h4 style="color:var(--danger); margin-bottom:8px;">⚠️ YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</h4>
+        <p id="forgeryDetails" style="font-size:13px; opacity:0.8;"></p>
+    </div>
+
+    <div id="results" style="display:none;">
+        <div class="btn-row">
+            <button class="tool-btn" onclick="exportPDF()">PDF RAPOR</button>
+            <button class="tool-btn" onclick="exportCSV()">CSV DIŞA AKTAR</button>
+            <button class="tool-btn" onclick="copyMeta()">METİNLERİ KOPYALA</button>
+        </div>
+
+        <div class="ai-card">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--accent); letter-spacing:2px;">AI_LOKASYON_VE_CIHAZ_RAPORU</span>
+            <p id="aiReport" style="margin-top:12px; line-height:1.6; font-size:14px; color:#ccc;"></p>
+        </div>
+
+        <table class="meta-table" id="metaTable"></table>
+    </div>
+</div>
+
+<script>
+const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
+
+// ══════════════ GİRİŞ KONTROLÜ ══════════════
+async function checkAccess() {
+    const user = document.getElementById('loginUser').value.trim();
+    const key = document.getElementById('loginKey').value.trim();
+    const status = document.getElementById('status');
+    
+    if(!user || !key) return;
+    status.innerText = "YETKİ SORGULANIYOR...";
+
+    try {
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`);
+        const data = await res.json();
+        const keys = JSON.parse(data.files['p4_db.json'].content);
+        const found = keys.find(k => k.user === user && k.key === key && k.status === 'active');
+
+        if(found) {
+            sessionStorage.setItem('p4_auth', 'true');
+            sessionStorage.setItem('p4_name', found.user);
+            showApp(found.user);
+        } else {
+            status.innerText = "GEÇERSİZ KİMLİK BİLGİLERİ!";
+        }
+    } catch(e) { status.innerText = "BULUT BAĞLANTI HATASI!"; }
+}
+
+function showApp(name) {
+    document.getElementById('loginScreen').style.display = 'none';
+    const app = document.getElementById('mainApp');
+    app.style.display = 'block';
+    setTimeout(() => app.classList.add('authorized'), 50);
+    document.getElementById('userBadge').innerText = `@${name}`;
+}
+
+// ══════════════ SENİN EXIF-V3 KODLARIN ══════════════
+function processFile(file) {
+    if(!file) return;
+    document.getElementById('results').style.display = 'block';
+    
+    EXIF.getData(file, function() {
+        const all = EXIF.getAllTags(this);
+        
+        // Sahtecilik Kontrolü (Orijinal Logic)
+        const software = all.Software || "";
+        const alert = document.getElementById('forgeryAlert');
+        if(software.match(/Adobe|Photoshop|GIMP|Canva|Pixelmator/i)) {
+            alert.style.display = 'block';
+            document.getElementById('forgeryDetails').innerText = `Tespit edilen yazılım: ${software}. Bu görsel orijinal olmayabilir.`;
+        } else {
+            alert.style.display = 'none';
+        }
+
+        // AI ve Cihaz Raporu
+        let report = `Cihaz: ${all.Make || 'Belirsiz'} ${all.Model || ''}<br>`;
+        if(all.GPSLatitude) {
+            const lat = convert(all.GPSLatitude, all.GPSLatitudeRef);
+            const lon = convert(all.GPSLongitude, all.GPSLongitudeRef);
+            report += `Konum: ${lat.toFixed(6)}, ${lon.toFixed(6)} (GPS Etiketi Mevcut)`;
+        } else {
+            report += `Konum Verisi: Mevcut Değil.`;
+        }
+        document.getElementById('aiReport').innerHTML = report;
+
+        // Tabloyu Yazdır
+        const table = document.getElementById('metaTable');
+        table.innerHTML = "";
+        Object.entries(all).forEach(([k, v]) => {
+            if(typeof v === 'object' || typeof v === 'function') return;
+            table.innerHTML += `<tr><td class="meta-key">${k}</td><td class="meta-val">${v}</td></tr>`;
+        });
+    });
+}
+
+function convert(c, r) {
+    let d = c[0] + c[1]/60 + c[2]/3600;
+    return (r === "S" || r === "W") ? -d : d;
+}
+
+// Export ve Diğerleri
+function copyMeta() {
+    const text = document.getElementById('metaTable').innerText;
+    navigator.clipboard.writeText(text);
+    alert("Kopyalandı!");
+}
+function exportPDF() { alert("PDF Hazırlanıyor..."); }
+function exportCSV() { alert("CSV Hazırlanıyor..."); }
+
+// Oturum Koruma
+if(sessionStorage.getItem('p4_auth') === 'true') {
+    showApp(sessionStorage.getItem('p4_name'));
+}
+</script>
+</body>
+</html>
