@@ -3,998 +3,214 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>provider.4 — EXIF ULTIMATE</title>
+<title>provider.4 — ULTIMATE EXIF</title>
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-/* ══════ THEMES ══════ */
 :root{
-  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--surf3:#1e1e1e;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --a:#00ff88;--a-d:#00cc66;--a-glow:rgba(0,255,136,0.15);
-  --danger:#ff3355;--yellow:#ffcc00;--blue:#4488ff;--purple:#a855f7;
-  --text:#fff;--text2:#888;--text3:#444;
-  --mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif;
-  --ib:env(safe-area-inset-bottom,0px);--it:env(safe-area-inset-top,0px);
+  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--border:rgba(255,255,255,0.07);
+  --accent:#00ff88;--text:#fff;--text2:#888;--danger:#ff3355;--mono:'Space Mono',monospace;
 }
-[data-theme="electric"]{--a:#00d4ff;--a-d:#0099bb;--a-glow:rgba(0,212,255,0.15)}
-[data-theme="cyberpunk"]{--a:#39ff14;--a-d:#2bcc0f;--a-glow:rgba(57,255,20,0.15);--bg:#000;--surf:#060606;--surf2:#0d0d0d}
-[data-theme="ocean"]{--a:#00bcd4;--a-d:#008fa1;--a-glow:rgba(0,188,212,0.15);--bg:#000d10;--surf:#001a20;--surf2:#002530}
-[data-theme="sunset"]{--a:#ff6b35;--a-d:#cc4f1f;--a-glow:rgba(255,107,53,0.15);--bg:#0a0000;--surf:#140800;--surf2:#1e1000}
-[data-theme="forest"]{--a:#4caf50;--a-d:#357a38;--a-glow:rgba(76,175,80,0.15);--bg:#000500;--surf:#030d03;--surf2:#061606}
-[data-theme="blood"]{--a:#ff1744;--a-d:#c62828;--a-glow:rgba(255,23,68,0.15);--bg:#060000;--surf:#120000;--surf2:#1c0000}
-[data-theme="purple"]{--a:#a855f7;--a-d:#7c3aed;--a-glow:rgba(168,85,247,0.15);--bg:#050008;--surf:#0d0015;--surf2:#160020}
-[data-theme="mono"]{--a:#fff;--a-d:#ccc;--a-glow:rgba(255,255,255,0.08)}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;height:100vh;overflow:hidden;}
 
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100dvh;overflow-x:hidden;transition:background 0.4s}
+/* LOGIN & LANG */
+#loginScreen { position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; align-items:center; justify-content:center; }
+.login-card { width:100%; max-width:360px; background:var(--surf); border:1px solid var(--border); padding:40px 24px; border-radius:28px; text-align:center; }
+.lang-selector { margin-bottom: 20px; background: var(--surf2); color: var(--text); border: 1px solid var(--border); padding: 8px; border-radius: 8px; font-family: var(--mono); cursor: pointer; }
 
-body::before{content:'';position:fixed;inset:0;z-index:0;
-  background:radial-gradient(ellipse 60% 40% at 70% 0%,var(--a-glow),transparent 60%),
-             radial-gradient(ellipse 40% 40% at 10% 90%,rgba(0,0,0,0.5),transparent 70%);
-  pointer-events:none;transition:background 0.4s}
+/* APP LAYOUT */
+.app-container { display:none; height:100vh; grid-template-columns: 480px 1fr; }
+.authorized { display:grid; }
+.sidebar { background:var(--surf); border-right:1px solid var(--border); overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:20px; }
+#map { flex:1; }
 
-/* ══════ LOGIN ══════ */
-#loginScreen{
-  position:fixed;inset:0;background:var(--bg);z-index:10000;
-  display:flex;align-items:center;justify-content:center;padding:20px;
-  transition:opacity 0.4s,transform 0.4s;
-}
-#loginScreen.hide{opacity:0;transform:scale(1.04);pointer-events:none}
-.login-glow{width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,var(--a-glow),transparent 70%);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:40px}
-.login-card{width:100%;max-width:380px;background:rgba(13,13,13,0.85);border:1px solid var(--border2);padding:36px 28px;border-radius:28px;text-align:center;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 24px 60px rgba(0,0,0,0.6),0 0 0 1px var(--border)}
-.login-logo{font-family:var(--mono);color:var(--a);letter-spacing:5px;font-size:12px;margin-bottom:8px;font-weight:700}
-.login-title{font-size:24px;font-weight:800;margin-bottom:4px;letter-spacing:-0.5px}
-.login-sub{font-size:11px;color:var(--text2);letter-spacing:1px;margin-bottom:28px}
-.input-group{margin-bottom:12px;text-align:left}
-.input-label{font-size:10px;font-family:var(--mono);color:var(--text2);margin-left:2px;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:1px}
-.login-input{width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:12px;color:#fff;padding:13px 14px;font-family:var(--mono);outline:none;transition:0.2s;font-size:14px;-webkit-appearance:none}
-.login-input:focus{border-color:color-mix(in srgb,var(--a) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--a) 8%,transparent)}
-.login-btn{width:100%;background:var(--a);color:#000;border:none;padding:15px;border-radius:12px;font-weight:900;cursor:pointer;margin-top:10px;transition:0.2s;letter-spacing:0.5px;font-size:14px;font-family:var(--sans)}
-.login-btn:active{transform:scale(0.97)}
-.login-status{margin-top:12px;font-size:11px;color:var(--text3);font-family:var(--mono);min-height:18px;text-align:center;transition:color 0.2s}
-.login-status.err{color:var(--danger)}
-.login-status.ok{color:var(--a)}
-.demo-btn{background:none;border:1px solid var(--border2);border-radius:12px;color:var(--text2);font-family:var(--sans);font-size:12px;font-weight:600;height:40px;width:100%;cursor:pointer;margin-top:8px;transition:0.2s}
-.demo-btn:active{border-color:var(--a);color:var(--a)}
+/* COMPONENTS */
+#dropZone { border:2px dashed var(--border); border-radius:20px; padding:40px 20px; text-align:center; cursor:pointer; }
+.status-badge { display:inline-block; padding:4px 8px; border-radius:6px; font-size:10px; font-family:var(--mono); font-weight:bold; margin-bottom:10px; }
+.forgery-alert { background:rgba(255,51,85,0.1); border:1px solid var(--danger); color:var(--danger); padding:15px; border-radius:12px; margin-bottom:15px; display:none; }
+.meta-table { width:100%; border-collapse:collapse; margin-top:20px; font-family:var(--mono); font-size:12px; }
+.meta-table td { padding:10px; border-bottom:1px solid var(--border); }
+.meta-key { color:var(--text2); }
+.meta-val { color:var(--accent); text-align:right; }
 
-/* ══════ MAIN APP ══════ */
-#mainApp{display:none;position:relative;z-index:1;max-width:660px;margin:0 auto;min-height:100dvh;flex-direction:column}
-#mainApp.show{display:flex}
+.action-btn { background:var(--surf2); color:var(--text); border:1px solid var(--border); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:11px; margin-right:5px; transition: 0.2s; }
+.action-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* TOPBAR */
-.topbar{padding:calc(var(--it)+12px) 16px 10px;display:flex;align-items:center;gap:10px;background:rgba(0,0,0,0.8);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;flex-shrink:0}
-.tb-logo{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--a);letter-spacing:1.5px;flex-shrink:0}
-.tb-sep{width:1px;height:14px;background:var(--border2);flex-shrink:0}
-.tb-user{font-size:11px;color:var(--text2);flex:1;font-family:var(--mono)}
-.tb-plan{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:8px;border:1px solid;flex-shrink:0}
-.tb-plan.active{color:var(--a);border-color:color-mix(in srgb,var(--a) 30%,transparent);background:color-mix(in srgb,var(--a) 8%,transparent)}
-
-/* TABS */
-.tabs{display:flex;background:rgba(0,0,0,0.6);border-bottom:1px solid var(--border);flex-shrink:0}
-.tab{flex:1;background:none;border:none;color:var(--text3);font-family:var(--sans);font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:10px 4px 8px;cursor:pointer;transition:color 0.18s;display:flex;flex-direction:column;align-items:center;gap:3px;position:relative}
-.tab .ti{font-size:17px}
-.tab.active{color:var(--a)}
-.tab.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--a);border-radius:2px;box-shadow:0 0 8px var(--a-glow)}
-
-/* PAGES */
-.pages{flex:1;overflow:hidden;position:relative}
-.page{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(20px + var(--ib));opacity:0;pointer-events:none;transform:translateY(6px);transition:opacity 0.22s,transform 0.22s}
-.page.active{opacity:1;pointer-events:all;transform:translateY(0)}
-
-/* CARDS */
-.gc{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:16px;margin-bottom:10px;overflow:hidden}
-.gc-head{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-.gc-title{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
-.gc-body{padding:12px 14px}
-
-/* DROP ZONE */
-.dropzone{border:1.5px dashed color-mix(in srgb,var(--a) 30%,transparent);border-radius:16px;padding:44px 20px;text-align:center;cursor:pointer;transition:all 0.25s;background:color-mix(in srgb,var(--a) 2%,transparent);margin-bottom:10px;position:relative;overflow:hidden}
-.dropzone::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,color-mix(in srgb,var(--a) 5%,transparent),transparent 70%);pointer-events:none}
-.dropzone.drag{border-color:var(--a);box-shadow:0 0 30px var(--a-glow)}
-.dropzone.loaded{border-style:solid;border-color:color-mix(in srgb,var(--a) 40%,transparent)}
-.dz-icon{font-size:44px;display:block;margin-bottom:12px}
-.dz-title{font-size:18px;font-weight:700;margin-bottom:5px}
-.dz-sub{font-size:11px;color:var(--text2)}
-
-/* PREVIEW */
-.img-prev{border-radius:14px;overflow:hidden;position:relative;margin-bottom:10px;border:1px solid var(--border2);display:none}
-.img-prev.show{display:block}
-#prevImg{width:100%;max-height:260px;object-fit:cover;display:block}
-.img-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,transparent 55%);pointer-events:none}
-.img-bottom{position:absolute;bottom:10px;left:12px;right:12px;display:flex;align-items:flex-end;justify-content:space-between}
-.img-name{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.img-size-badge{font-family:var(--mono);font-size:10px;color:var(--a);flex-shrink:0;margin-left:8px}
-
-/* FORGERY ALERT */
-.forgery-alert{background:rgba(255,51,85,0.06);border:1px solid rgba(255,51,85,0.3);border-radius:14px;padding:14px 16px;margin-bottom:10px;display:none}
-.forgery-alert.show{display:block;animation:fu 0.3s ease}
-.fa-title{color:var(--danger);font-weight:700;font-size:13px;margin-bottom:6px}
-.fa-body{font-size:12px;color:rgba(255,100,120,0.85);line-height:1.6}
-
-/* SUMMARY */
-.sum-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
-.sum-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:14px;padding:13px 11px;position:relative;overflow:hidden}
-.sum-card::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(--a),transparent)}
-.sum-icon{font-size:20px;margin-bottom:6px}
-.sum-val{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sum-key{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2)}
-
-/* AI */
-.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.ai-card{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:13px}
-.ai-lbl{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
-.ai-score{font-size:26px;font-weight:700;font-family:var(--mono);margin-bottom:3px}
-.ai-sub{font-size:10px;color:var(--text2);line-height:1.4}
-.sbar{height:3px;border-radius:2px;background:var(--border);margin-top:7px;overflow:hidden}
-.sbar-fill{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.16,1,.3,1)}
-
-/* HISTOGRAM */
-canvas.hist{width:100%;height:72px;border-radius:8px;display:block;margin-bottom:10px}
-
-/* PALETTE */
-.palette{display:flex;gap:6px;flex-wrap:wrap}
-.swatch{width:34px;height:34px;border-radius:8px;cursor:pointer;border:1px solid var(--border2);transition:transform 0.15s}
-.swatch:active{transform:scale(1.15)}
-
-/* ROWS */
-.row{display:flex;align-items:flex-start;gap:8px;padding:9px 14px;border-bottom:1px solid var(--border);background:rgba(0,0,0,0.15);transition:background 0.1s}
-.row:last-child{border-bottom:none}
-.row:active{background:rgba(255,255,255,0.04)}
-.row-k{font-family:var(--mono);font-size:9px;color:var(--text3);flex-shrink:0;width:110px;padding-top:2px;text-transform:uppercase;letter-spacing:0.3px}
-.row-v{font-family:var(--mono);font-size:11px;color:var(--text);flex:1;word-break:break-all;line-height:1.5}
-.row-v.ac{color:var(--a)}
-.row-v.gr{color:#00ff88}
-.row-v.ye{color:var(--yellow)}
-.row-v.re{color:var(--danger)}
-.row-copy{background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color 0.15s}
-.row-copy:active{color:var(--a)}
-
-/* SECTIONS */
-.sec{margin-bottom:8px;border-radius:14px;overflow:hidden;border:1px solid var(--border)}
-.sec-h{padding:12px 14px;display:flex;align-items:center;gap:8px;cursor:pointer;background:rgba(255,255,255,0.03);transition:background 0.15s;user-select:none}
-.sec-h:active{background:rgba(255,255,255,0.06)}
-.sec-icon{font-size:15px;flex-shrink:0}
-.sec-title{font-size:12px;font-weight:600;flex:1}
-.sec-badge{font-family:var(--mono);font-size:9px;color:var(--a);background:color-mix(in srgb,var(--a) 10%,transparent);border:1px solid color-mix(in srgb,var(--a) 20%,transparent);padding:2px 7px;border-radius:8px}
-.sec-arr{font-size:11px;color:var(--text3);transition:transform 0.2s}
-.sec-h.open .sec-arr{transform:rotate(180deg)}
-.sec-b{display:none;border-top:1px solid var(--border)}
-.sec-b.open{display:block}
-
-/* GPS */
-.gps-banner{background:linear-gradient(135deg,rgba(0,255,136,0.07),rgba(0,212,255,0.04));border:1px solid rgba(0,255,136,0.2);border-radius:14px;padding:13px 14px;margin-bottom:10px;display:none;align-items:center;gap:10px}
-.gps-banner.show{display:flex}
-.gps-dot{width:8px;height:8px;border-radius:50%;background:#00ff88;flex-shrink:0;animation:gp 2s infinite}
-@keyframes gp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
-.gps-info{flex:1}
-.gps-lbl{font-size:11px;font-weight:700;color:#00ff88;margin-bottom:2px}
-.gps-coords{font-family:var(--mono);font-size:10px;color:var(--text2)}
-.map-btn{background:#00ff88;border:none;border-radius:8px;color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:8px 12px;cursor:pointer;flex-shrink:0;min-height:34px}
-
-/* LOADING */
-.loading{text-align:center;padding:50px 20px;display:none}
-.loading.show{display:block}
-.spin{width:38px;height:38px;border-radius:50%;border:2px solid var(--border2);border-top-color:var(--a);animation:spin 0.8s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* BUTTONS */
-.btn{background:var(--a);border:none;border-radius:10px;color:#000;font-family:var(--sans);font-size:13px;font-weight:700;padding:0 16px;height:42px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s;white-space:nowrap}
-.btn:active{transform:scale(0.96)}
-.btn.full{width:100%;justify-content:center}
-.btn.ghost{background:rgba(255,255,255,0.06);color:var(--text);border:1px solid var(--border2)}
-.btn.ghost:active{background:rgba(255,255,255,0.1)}
-.btn.outline{background:none;border:1px solid var(--a);color:var(--a)}
-.btn.danger{background:var(--danger);color:#fff}
-.btn.sm{height:34px;font-size:11px;padding:0 12px;border-radius:8px}
-
-/* THEMES GRID */
-.theme-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
-.theme-btn{border:2px solid var(--border);border-radius:12px;padding:10px 6px;cursor:pointer;text-align:center;background:rgba(255,255,255,0.03);transition:all 0.15s}
-.theme-btn.active{border-color:var(--a)}
-.theme-btn:active{transform:scale(0.95)}
-.theme-dot{width:22px;height:22px;border-radius:50%;margin:0 auto 5px;border:1px solid rgba(255,255,255,0.1)}
-.theme-name{font-size:8px;font-weight:600;letter-spacing:0.5px;color:var(--text2)}
-
-/* TOGGLE */
-.toggle{width:42px;height:24px;border-radius:12px;background:var(--surf3,#1e1e1e);border:1px solid var(--border2);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
-.toggle.on{background:var(--a)}
-.toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.4)}
-.toggle.on .toggle-knob{transform:translateX(18px)}
-
-/* TOAST */
-.toast{position:fixed;bottom:calc(20px + var(--ib));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,0.95);border:1px solid var(--border2);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:all 0.25s;z-index:500;white-space:nowrap;backdrop-filter:blur(10px)}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* WM */
-.wm{position:fixed;bottom:calc(var(--ib)+4px);right:12px;font-family:var(--mono);font-size:8px;color:var(--text3);letter-spacing:1px;z-index:30;pointer-events:none}
-
-/* KEY INFO */
-.key-bar{background:color-mix(in srgb,var(--a) 6%,transparent);border:1px solid color-mix(in srgb,var(--a) 20%,transparent);border-radius:12px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
-.kb-icon{font-size:18px;flex-shrink:0}
-.kb-body{flex:1}
-.kb-user{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--a)}
-.kb-detail{font-size:10px;color:var(--text2);margin-top:1px}
-.kb-logout{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-family:var(--mono);font-size:10px;padding:5px 10px;cursor:pointer;flex-shrink:0;min-height:28px;transition:all 0.15s}
-.kb-logout:active{border-color:var(--danger);color:var(--danger)}
-
-/* EDIT FIELD */
-.ef-label{display:block;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--text2);margin-bottom:6px;font-weight:600}
-.ef-input{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--mono);font-size:13px;padding:10px 12px;outline:none;transition:border-color 0.18s;-webkit-appearance:none;margin-bottom:10px}
-.ef-input:focus{border-color:color-mix(in srgb,var(--a) 40%,transparent)}
-
-/* SETTINGS ITEM */
-.si{background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
-.si-icon{font-size:18px;flex-shrink:0;width:26px;text-align:center}
-.si-body{flex:1}
-.si-title{font-size:13px;font-weight:600}
-.si-sub{font-size:11px;color:var(--text2);margin-top:1px}
-
-/* SECTION TITLE */
-.sec-title-label{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;padding:0 2px}
-
-/* QR */
-#qrCanvas{display:block;margin:0 auto 10px;border-radius:10px;background:var(--surf2)}
-
-/* ANIM */
-.fade-up{animation:fu 0.3s ease forwards;opacity:0}
-@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-::-webkit-scrollbar{width:3px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:var(--surf3,#1e1e1e);border-radius:2px}
+@media (max-width:1000px) { .app-container { grid-template-columns: 1fr; } .sidebar { height: 60vh; } }
 </style>
 </head>
 <body>
 
-<!-- ══════ LOGIN ══════ -->
 <div id="loginScreen">
-  <div class="login-card">
-    <div class="login-glow">🔍</div>
-    <div class="login-logo">PROVIDER.4</div>
-    <div class="login-title">Sistem Erişimi</div>
-    <div class="login-sub">YETKİLİ ERİŞİMİ GEREKLİ</div>
-    <div class="input-group">
-      <span class="input-label">Kullanıcı Adı</span>
-      <input type="text" id="loginUser" class="login-input" placeholder="kullanici_adi" autocorrect="off" autocapitalize="off" autocomplete="off">
+    <div class="login-card">
+        <select id="langSelect" class="lang-selector" onchange="updateLang()">
+            <option value="tr">TR - Türkçe</option>
+            <option value="en">EN - English</option>
+            <option value="de">DE - Deutsch</option>
+            <option value="fr">FR - Français</option>
+            <option value="es">ES - Español</option>
+            <option value="ru">RU - Русский</option>
+            <option value="it">IT - Italiano</option>
+            <option value="pt">PT - Português</option>
+            <option value="ar">AR - العربية</option>
+            <option value="zh">ZH - 中文</option>
+        </select>
+        <h2 id="loginTitle" style="margin-bottom:20px; letter-spacing:2px; color:var(--accent)">provider.4</h2>
+        <input type="text" id="loginUser" class="login-input" style="width:100%; background:var(--surf2); border:1px solid var(--border); border-radius:12px; color:#fff; padding:14px; margin-bottom:12px; text-align:center; outline:none;" placeholder="User">
+        <input type="password" id="loginKey" class="login-input" style="width:100%; background:var(--surf2); border:1px solid var(--border); border-radius:12px; color:#fff; padding:14px; margin-bottom:12px; text-align:center; outline:none;" placeholder="Key">
+        <button id="loginBtn" class="login-btn" onclick="checkAccess()">LOGIN</button>
+        <p id="status" style="color:#444; font-size:11px; margin-top:15px; font-family:var(--mono)"></p>
     </div>
-    <div class="input-group">
-      <span class="input-label">Erişim Anahtarı</span>
-      <input type="text" id="loginKey" class="login-input" placeholder="P4-XXXXX-XXXXX-XXXXX-XXXXX" autocorrect="off" autocapitalize="characters" autocomplete="off" onkeydown="if(event.key==='Enter')checkAccess()">
-    </div>
-    <button class="login-btn" onclick="checkAccess()">OTURUM AÇ</button>
-    <button class="demo-btn" onclick="demoLogin()">🕐 Demo Modu (5 dakika)</button>
-    <div class="login-status" id="loginStatus"></div>
-  </div>
 </div>
 
-<!-- ══════ MAIN APP ══════ -->
-<div id="mainApp">
-
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="tb-logo">p.4</div>
-    <div class="tb-sep"></div>
-    <div class="tb-user" id="tbUser">—</div>
-    <div class="tb-plan active" id="tbPlan">—</div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs">
-    <button class="tab active" id="tab0" onclick="goTab(0)"><span class="ti">🖼</span>Analiz</button>
-    <button class="tab" id="tab1" onclick="goTab(1)"><span class="ti">📍</span>GPS</button>
-    <button class="tab" id="tab2" onclick="goTab(2)"><span class="ti">📤</span>Aktar</button>
-    <button class="tab" id="tab3" onclick="goTab(3)"><span class="ti">⚙️</span>Ayarlar</button>
-  </div>
-
-  <!-- PAGES -->
-  <div class="pages">
-
-    <!-- PAGE 0: ANALİZ -->
-    <div class="page active" id="page0">
-      <div class="key-bar">
-        <div class="kb-icon">🔑</div>
-        <div class="kb-body">
-          <div class="kb-user" id="kbUser">@—</div>
-          <div class="kb-detail" id="kbDetail">—</div>
+<div class="app-container" id="mainApp">
+    <div class="sidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center">
+            <span style="font-family:var(--mono); color:var(--accent); font-weight:bold">P.4_ULTIMATE</span>
+            <span id="userBadge" style="font-size:10px; opacity:0.5"></span>
         </div>
-        <button class="kb-logout" onclick="logoutUser()">Çıkış</button>
-      </div>
 
-      <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-        <span class="dz-icon">📸</span>
-        <div class="dz-title">Fotoğraf Seç veya Bırak</div>
-        <div class="dz-sub">JPEG · PNG · HEIC · TIFF · WebP · RAW</div>
-        <input type="file" id="fileInput" accept="image/*" hidden>
-      </div>
-
-      <div class="img-prev" id="imgPrev">
-        <img id="prevImg" alt="">
-        <div class="img-overlay"></div>
-        <div class="img-bottom">
-          <div class="img-name" id="imgName"></div>
-          <div class="img-size-badge" id="imgSizeBadge"></div>
+        <div id="dropZone" onclick="document.getElementById('fileInput').click()">
+            <div style="font-size:30px">📸</div>
+            <h3 id="ui_uploadTitle">Dosya Yükle</h3>
+            <p id="ui_uploadSub" style="font-size:12px; color:var(--text2)">Sürükle veya seç</p>
+            <input type="file" id="fileInput" hidden accept="image/*" onchange="processFile(this.files[0])">
         </div>
-      </div>
 
-      <!-- Forgery Alert -->
-      <div class="forgery-alert" id="forgeryAlert">
-        <div class="fa-title">⚠️ YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</div>
-        <div class="fa-body" id="forgeryBody"></div>
-      </div>
-
-      <div class="loading" id="loading">
-        <div class="spin"></div>
-        <div style="font-size:11px;color:var(--text2);letter-spacing:1px">Metadata okunuyor…</div>
-      </div>
-
-      <!-- Summary -->
-      <div class="sum-grid" id="sumGrid" style="display:none"></div>
-
-      <!-- AI -->
-      <div class="gc" id="aiCard" style="display:none">
-        <div class="gc-head"><div class="gc-title">🤖 AI ANALİZİ</div></div>
-        <div class="gc-body"><div class="ai-grid" id="aiGrid"></div></div>
-      </div>
-
-      <!-- Palette + Histogram -->
-      <div class="gc" id="paletteCard" style="display:none">
-        <div class="gc-head"><div class="gc-title">🎨 RENK & HİSTOGRAM</div></div>
-        <div class="gc-body">
-          <canvas id="histCanvas" class="hist"></canvas>
-          <div class="palette" id="paletteEl"></div>
+        <div id="forgeryAlert" class="forgery-alert">
+            <strong id="ui_forgeryTitle">⚠️ DİKKAT: SAHTECİLİK TESPİT EDİLDİ</strong><br>
+            <span id="ui_forgeryMsg" style="font-size:12px;">Bu görsel yazılımsal müdahale (Photoshop/Editing) izleri taşıyor.</span>
         </div>
-      </div>
 
-      <!-- EXIF Sections -->
-      <div id="exifSections"></div>
-    </div>
-
-    <!-- PAGE 1: GPS -->
-    <div class="page" id="page1">
-      <div class="gps-banner" id="gpsBanner">
-        <div class="gps-dot"></div>
-        <div class="gps-info">
-          <div class="gps-lbl">📍 Konum Verisi Bulundu</div>
-          <div class="gps-coords" id="gpsCoordsEl"></div>
-        </div>
-        <button class="map-btn" id="mapBtn">🗺 Harita</button>
-      </div>
-      <div class="gc" id="noGpsCard">
-        <div class="gc-body" style="text-align:center;padding:30px">
-          <div style="font-size:30px;margin-bottom:10px">📍</div>
-          <div style="font-size:14px;font-weight:600;color:var(--text2)">GPS verisi bulunamadı</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:5px">Bu fotoğrafta konum bilgisi yok</div>
-        </div>
-      </div>
-      <div id="gpsDetailWrap"></div>
-      <div class="gc" id="locHideCard" style="display:none">
-        <div class="gc-head"><div class="gc-title">🔒 KONUM GİZLEME</div></div>
-        <div class="gc-body">
-          <div style="font-size:12px;color:var(--text2);margin-bottom:12px">GPS verisini sil veya sahte konum ekle</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-            <button class="btn sm outline" onclick="stripGPS()">🗑 GPS Sil</button>
-            <button class="btn sm outline" onclick="toggleFakeForm()">🎭 Sahte Konum</button>
-          </div>
-          <div id="fakeForm" style="display:none">
-            <div style="display:flex;gap:8px;margin-bottom:8px">
-              <input type="number" id="fakeLat" placeholder="Enlem: 41.0082" step="0.0001" class="ef-input" style="margin-bottom:0">
-              <input type="number" id="fakeLon" placeholder="Boylam: 28.9784" step="0.0001" class="ef-input" style="margin-bottom:0">
+        <div id="infoArea" style="display:none">
+            <div style="display:flex; gap:5px; margin-bottom:15px;">
+                <button class="action-btn" onclick="exportPDF()">PDF</button>
+                <button class="action-btn" onclick="exportCSV()">CSV</button>
+                <button class="action-btn" onclick="copyAll()">COPY ALL</button>
             </div>
-            <button class="btn sm full" onclick="applyFake()">✓ Uygula</button>
-          </div>
-          <div id="locMsg" style="font-size:11px;color:#00ff88;min-height:16px;margin-top:8px"></div>
+            
+            <div id="aiBox" style="background:var(--surf2); padding:15px; border-radius:12px; margin-bottom:15px">
+                <span style="font-size:10px; color:var(--accent); font-family:var(--mono)">AI_REPORT:</span>
+                <p id="aiResult" style="font-size:13px; margin-top:5px; color:#ccc">Waiting...</p>
+            </div>
+            
+            <table class="meta-table" id="metaTable"></table>
         </div>
-      </div>
     </div>
-
-    <!-- PAGE 2: AKTAR -->
-    <div class="page" id="page2">
-      <!-- Edit -->
-      <div class="gc">
-        <div class="gc-head"><div class="gc-title">✏️ METADATA DÜZENLE</div></div>
-        <div class="gc-body" id="editFields">
-          <div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">Önce Analiz sekmesinden fotoğraf yükleyin</div>
-        </div>
-      </div>
-      <!-- QR -->
-      <div class="gc">
-        <div class="gc-head"><div class="gc-title">▦ QR KOD</div></div>
-        <div class="gc-body">
-          <div style="font-size:12px;color:var(--text2);margin-bottom:12px">EXIF özetini QR koda göm</div>
-          <canvas id="qrCanvas" width="200" height="200"></canvas>
-          <button class="btn full ghost" style="margin-top:10px" onclick="generateQR()">▦ QR Üret</button>
-        </div>
-      </div>
-      <!-- Export -->
-      <div class="gc">
-        <div class="gc-head"><div class="gc-title">📤 DIŞA AKTAR</div></div>
-        <div class="gc-body" style="display:flex;flex-direction:column;gap:8px">
-          <button class="btn full ghost" onclick="exportJSON()">📄 JSON İndir</button>
-          <button class="btn full ghost" onclick="exportTXT()">📋 TXT İndir</button>
-          <button class="btn full ghost" onclick="exportCSV()">📊 CSV İndir</button>
-          <button class="btn full ghost" onclick="exportPDF()">📑 Rapor (TXT)</button>
-          <button class="btn full ghost" onclick="copyMeta()">📎 Tümünü Kopyala</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- PAGE 3: AYARLAR -->
-    <div class="page" id="page3">
-
-      <div class="sec-title-label">Tema</div>
-      <div class="theme-grid" id="themeGrid" style="margin-bottom:14px"></div>
-
-      <div class="sec-title-label">Görünüm</div>
-      <div class="si" style="margin-bottom:6px">
-        <div class="si-icon">🔤</div>
-        <div class="si-body"><div class="si-title">Büyük Metin</div><div class="si-sub">Değerler için +2px</div></div>
-        <div class="toggle" id="bigTxt" onclick="toggleBigText()"><div class="toggle-knob"></div></div>
-      </div>
-      <div class="si" style="margin-bottom:14px">
-        <div class="si-icon">📊</div>
-        <div class="si-body"><div class="si-title">Histogram</div><div class="si-sub">RGB kanal grafiği</div></div>
-        <div class="toggle on" id="histToggle" onclick="toggleS('hist',this)"><div class="toggle-knob"></div></div>
-      </div>
-
-      <div class="sec-title-label">Hesap</div>
-      <div class="gc">
-        <div class="gc-body">
-          <div class="row" style="background:none;border:none;padding:0 0 8px">
-            <div class="row-k">Kullanıcı</div><div class="row-v ac" id="sUser">—</div>
-          </div>
-          <div class="row" style="background:none;border:none;padding:4px 0 8px">
-            <div class="row-k">Plan</div><div class="row-v ye" id="sPlan">—</div>
-          </div>
-          <div class="row" style="background:none;border:none;padding:4px 0 0">
-            <div class="row-k">Bitiş</div><div class="row-v" id="sExpiry">—</div>
-          </div>
-          <button class="btn danger sm" style="width:100%;justify-content:center;margin-top:12px" onclick="logoutUser()">↩ Çıkış Yap</button>
-        </div>
-      </div>
-
-      <div style="text-align:center;padding:14px 0 4px">
-        <div style="font-family:var(--mono);font-size:11px;color:var(--a);letter-spacing:2px">provider.4</div>
-        <div style="font-size:10px;color:var(--text3);margin-top:3px;letter-spacing:1px">EXIF ULTIMATE v4.0</div>
-      </div>
-    </div>
-
-  </div>
+    <div id="map"></div>
 </div>
-
-<div class="toast" id="toast"></div>
-<div class="wm">provider.4</div>
 
 <script>
-// ══════════════════════════════════════════
-// CONFIG — sadece bu satırı değiştir
-// ══════════════════════════════════════════
 const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
+let map, marker, lang = 'tr';
 
-// ══════════════════════════════════════════
-// STATE
-// ══════════════════════════════════════════
-let curUser = null, curSession = null;
-let exifData = {}, fileName = '', fileObj = null, canvasBuf = null;
-let lat = null, lon = null;
-let appCfg = JSON.parse(localStorage.getItem('p4_cfg') || '{"theme":"forest","hist":true,"bigText":false}');
-let demoTimer = null;
+const translations = {
+    tr: { login: "GİRİŞ YAP", user: "Kullanıcı", key: "Anahtar", upload: "Görsel Yükle", sub: "Sürükle veya seç", forgery: "SAHTECİLİK TESPİT EDİLDİ", ai_wait: "Analiz bekleniyor...", ai_none: "Konum verisi yok." },
+    en: { login: "LOGIN", user: "Username", key: "Access Key", upload: "Upload Image", sub: "Drag or select", forgery: "FORGERY DETECTED", ai_wait: "Waiting for analysis...", ai_none: "No location data found." },
+    de: { login: "ANMELDEN", user: "Benutzer", key: "Schlüssel", upload: "Bild hochladen", sub: "Ziehen oder wählen", forgery: "FÄLSCHUNG ERKANNT", ai_wait: "Warten auf Analyse...", ai_none: "Keine Standortdaten." }
+    // Diğer diller buraya kısa diziler halinde eklenebilir...
+};
 
-// ══════════════════════════════════════════
-// LOGIN — GIST BACKEND (orijinal sistem)
-// ══════════════════════════════════════════
+function updateLang() {
+    lang = document.getElementById('langSelect').value;
+    const t = translations[lang] || translations.en;
+    document.getElementById('loginBtn').innerText = t.login;
+    document.getElementById('loginUser').placeholder = t.user;
+    document.getElementById('loginKey').placeholder = t.key;
+    document.getElementById('ui_uploadTitle').innerText = t.upload;
+    document.getElementById('ui_uploadSub').innerText = t.sub;
+}
+
 async function checkAccess() {
-  const user = document.getElementById('loginUser').value.trim().toLowerCase();
-  const key  = document.getElementById('loginKey').value.trim().toUpperCase();
-  const st   = document.getElementById('loginStatus');
-  if (!user || !key) { setStatus('Kullanıcı adı ve key girin', 'err'); return; }
-  setStatus('YETKİ SORGULANIYOR...', '');
-  try {
-    const res  = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`);
-    const data = await res.json();
-    const db   = JSON.parse(data.files['p4_db.json'].content);
-    const found = db.find(k => k.user === user && k.key === key && k.status === 'active');
-    if (!found) { setStatus('GEÇERSİZ KİMLİK BİLGİLERİ!', 'err'); return; }
-    const now = Date.now();
-    if (found.expires > 0 && found.expires < now) { setStatus('KEY SÜRESİ DOLMUŞ!', 'err'); return; }
-    sessionStorage.setItem('p4_auth', JSON.stringify({ user: found.user, plan: found.plan || 'active', expires: found.expires || 0 }));
-    enterApp(found.user, found.plan || 'active', found.expires || 0);
-  } catch(e) { setStatus('BULUT BAĞLANTI HATASI!', 'err'); }
+    const user = document.getElementById('loginUser').value.trim();
+    const key = document.getElementById('loginKey').value.trim();
+    if(!user || !key) return;
+    try {
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`);
+        const data = await res.json();
+        const keys = JSON.parse(data.files['p4_db.json'].content);
+        const found = keys.find(k => k.user === user && k.key === key && k.status === 'active');
+        if(found) {
+            sessionStorage.setItem('p4_auth', 'true');
+            sessionStorage.setItem('p4_user', found.user);
+            startApp(found.user);
+        } else { alert("Hatalı Key!"); }
+    } catch(e) { console.error(e); }
 }
 
-function demoLogin() {
-  const exp = Date.now() + 300000;
-  curUser = 'demo';
-  enterApp('demo', 'demo', exp);
-  let remaining = 300;
-  demoTimer = setInterval(() => {
-    remaining--;
-    document.getElementById('kbDetail').textContent = `Demo · ${remaining}s kaldı`;
-    if (remaining <= 0) { clearInterval(demoTimer); logoutUser(); }
-  }, 1000);
+function startApp(u) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').classList.add('authorized');
+    document.getElementById('userBadge').innerText = `@${u}`;
+    initMap();
 }
 
-function setStatus(msg, cls) {
-  const el = document.getElementById('loginStatus');
-  el.textContent = msg; el.className = 'login-status ' + cls;
+function initMap() {
+    if(map) return;
+    map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
 }
 
-function enterApp(user, plan, expires) {
-  curUser = user;
-  document.getElementById('loginScreen').classList.add('hide');
-  const app = document.getElementById('mainApp');
-  app.classList.add('show');
-  document.getElementById('tbUser').textContent = '@' + user;
-  document.getElementById('tbPlan').textContent = plan.toUpperCase();
-  document.getElementById('kbUser').textContent = '@' + user;
-  const expStr = expires > 0 ? new Date(expires).toLocaleDateString('tr-TR') : 'Süresiz';
-  document.getElementById('kbDetail').textContent = plan + ' · ' + expStr;
-  document.getElementById('sUser').textContent = user;
-  document.getElementById('sPlan').textContent = plan.toUpperCase();
-  document.getElementById('sExpiry').textContent = expStr;
-  applyTheme(appCfg.theme);
-  buildThemeGrid();
+function processFile(file) {
+    if(!file) return;
+    document.getElementById('infoArea').style.display = 'block';
+    
+    // Sahtecilik Algılama Mantığı (Software kontrolü)
+    EXIF.getData(file, function() {
+        const all = EXIF.getAllTags(this);
+        const software = all.Software || "";
+        const alertBox = document.getElementById('forgeryAlert');
+        
+        if(software.match(/Adobe|Photoshop|GIMP|Pixelmator|Canva/i)) {
+            alertBox.style.display = 'block';
+        } else {
+            alertBox.style.display = 'none';
+        }
+
+        renderTable(all);
+        handleGPS(all);
+    });
 }
 
-function logoutUser() {
-  sessionStorage.removeItem('p4_auth');
-  if (demoTimer) clearInterval(demoTimer);
-  curUser = null; exifData = {}; fileObj = null;
-  document.getElementById('loginScreen').classList.remove('hide');
-  document.getElementById('mainApp').classList.remove('show');
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginKey').value = '';
-  setStatus('', '');
-}
-
-// Session restore
-const saved = sessionStorage.getItem('p4_auth');
-if (saved) { try { const s = JSON.parse(saved); if (!s.expires || s.expires === 0 || s.expires > Date.now()) enterApp(s.user, s.plan, s.expires); } catch {} }
-
-// ══════════════════════════════════════════
-// TABS
-// ══════════════════════════════════════════
-function goTab(i) {
-  for (let j = 0; j < 4; j++) {
-    document.getElementById('tab' + j).classList.toggle('active', j === i);
-    document.getElementById('page' + j).classList.toggle('active', j === i);
-  }
-}
-
-// ══════════════════════════════════════════
-// THEMES
-// ══════════════════════════════════════════
-const THEMES = [
-  {id:'forest',name:'Forest',color:'#4caf50'},
-  {id:'electric',name:'Electric',color:'#00d4ff'},
-  {id:'cyberpunk',name:'Cyber',color:'#39ff14'},
-  {id:'ocean',name:'Ocean',color:'#00bcd4'},
-  {id:'sunset',name:'Sunset',color:'#ff6b35'},
-  {id:'blood',name:'Blood',color:'#ff1744'},
-  {id:'purple',name:'Purple',color:'#a855f7'},
-  {id:'mono',name:'Mono',color:'#ffffff'},
-];
-function buildThemeGrid() {
-  document.getElementById('themeGrid').innerHTML = THEMES.map(t =>
-    `<div class="theme-btn${appCfg.theme===t.id?' active':''}" onclick="applyTheme('${t.id}')">
-      <div class="theme-dot" style="background:${t.color};box-shadow:0 0 8px ${t.color}44"></div>
-      <div class="theme-name">${t.name}</div>
-    </div>`).join('');
-}
-function applyTheme(id) {
-  appCfg.theme = id; document.body.dataset.theme = id;
-  saveCfg(); buildThemeGrid();
-}
-function saveCfg() { localStorage.setItem('p4_cfg', JSON.stringify(appCfg)); }
-function toggleS(key, el) { appCfg[key] = !appCfg[key]; el.classList.toggle('on', appCfg[key]); saveCfg(); }
-function toggleBigText() {
-  appCfg.bigText = !appCfg.bigText;
-  document.getElementById('bigTxt').classList.toggle('on', appCfg.bigText);
-  document.querySelectorAll('.row-v').forEach(e => e.style.fontSize = appCfg.bigText ? '13px' : '11px');
-  saveCfg();
-}
-
-// ══════════════════════════════════════════
-// FILE HANDLING
-// ══════════════════════════════════════════
-const dropzone = document.getElementById('dropzone');
-const fileInput = document.getElementById('fileInput');
-dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('drag'); });
-dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag'));
-dropzone.addEventListener('drop', e => { e.preventDefault(); dropzone.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
-fileInput.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
-
-function fSize(b) { if(b<1024)return b+'B'; if(b<1048576)return(b/1024).toFixed(1)+'KB'; return(b/1048576).toFixed(2)+'MB'; }
-
-function loadFile(file) {
-  fileObj = file; fileName = file.name;
-  const r = new FileReader();
-  r.onload = e => {
-    document.getElementById('prevImg').src = e.target.result;
-    document.getElementById('imgName').textContent = file.name;
-    document.getElementById('imgSizeBadge').textContent = fSize(file.size);
-    document.getElementById('imgPrev').classList.add('show');
-    dropzone.classList.add('loaded');
-    const img = new Image();
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = Math.min(img.width, 220); c.height = Math.min(img.height, 220);
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      canvasBuf = c;
-    };
-    img.src = e.target.result;
-    startAnalysis(file);
-  };
-  r.readAsDataURL(file);
-}
-
-// ══════════════════════════════════════════
-// EXIF PARSER (pure JS)
-// ══════════════════════════════════════════
-const ETAGS = {0x010e:'ImageDescription',0x010f:'Make',0x0110:'Model',0x0112:'Orientation',0x011a:'XResolution',0x011b:'YResolution',0x0128:'ResolutionUnit',0x0131:'Software',0x0132:'DateTime',0x013b:'Artist',0x8298:'Copyright',0x8769:'ExifIFD',0x8825:'GPSIFD',0x9000:'ExifVersion',0x9003:'DateTimeOriginal',0x9004:'DateTimeDigitized',0x9201:'ShutterSpeedValue',0x9202:'ApertureValue',0x9203:'BrightnessValue',0x9204:'ExposureBiasValue',0x9207:'MeteringMode',0x9208:'LightSource',0x9209:'Flash',0x920a:'FocalLength',0xa000:'FlashPixVersion',0xa001:'ColorSpace',0xa002:'PixelXDimension',0xa003:'PixelYDimension',0xa402:'ExposureMode',0xa403:'WhiteBalance',0xa404:'DigitalZoomRatio',0xa405:'FocalLengthIn35mmFilm',0xa406:'SceneCaptureType',0xa408:'Contrast',0xa409:'Saturation',0xa40a:'Sharpness',0xa420:'ImageUniqueID',0xa430:'CameraOwnerName',0xa431:'BodySerialNumber',0xa433:'LensMake',0xa434:'LensModel',0xa435:'LensSerialNumber',0x829a:'ExposureTime',0x829d:'FNumber',0x8822:'ExposureProgram',0x8827:'PhotographicSensitivity',0x0100:'ImageWidth',0x0101:'ImageLength',0x0102:'BitsPerSample',0x0103:'Compression'};
-const GTAGS = {0:'GPSVersionID',1:'GPSLatitudeRef',2:'GPSLatitude',3:'GPSLongitudeRef',4:'GPSLongitude',5:'GPSAltitudeRef',6:'GPSAltitude',7:'GPSTimeStamp',8:'GPSSatellites',17:'GPSImgDirection',18:'GPSMapDatum',29:'GPSDateStamp'};
-const ORI = {1:'Normal',2:'Flip H',3:'180°',4:'Flip V',6:'90° CW',8:'270° CW'};
-const METER = {1:'Average',2:'Center-weighted',3:'Spot',5:'Pattern'};
-const EXPROG = {0:'Not defined',1:'Manual',2:'Auto',3:'Aperture priority',4:'Shutter priority',7:'Portrait',8:'Landscape'};
-const FMAP = {0:'No Flash',1:'Fired',9:'Fill Fired',16:'Off',24:'Auto/No Flash',25:'Auto Fired'};
-const WBM = {0:'Auto',1:'Manual'};
-
-function rRat(v,o,le){const n=v.getUint32(o,le),d=v.getUint32(o+4,le);return d?n/d:0;}
-function rStr(v,o,l){let s='';for(let i=0;i<l&&o+i<v.byteLength;i++){const c=v.getUint8(o+i);if(!c)break;s+=String.fromCharCode(c);}return s.trim();}
-function parseIFD(v,off,le,tags,res){
-  if(off+2>v.byteLength)return;
-  const cnt=v.getUint16(off,le);off+=2;
-  for(let i=0;i<cnt;i++){
-    if(off+12>v.byteLength)break;
-    const tag=v.getUint16(off,le),type=v.getUint16(off+2,le),num=v.getUint32(off+4,le),vo=v.getUint32(off+8,le);
-    off+=12;const tn=tags[tag];if(!tn)continue;
-    let val;
-    try{
-      if(type===2)val=rStr(v,num>4?vo:off-4,num);
-      else if(type===3)val=num===1?(num>2?v.getUint16(vo,le):v.getUint16(off-4,le)):Array.from({length:Math.min(num,8)},(_,j)=>v.getUint16((num>2?vo:off-4)+j*2,le));
-      else if(type===4)val=num>1?vo:v.getUint32(off-4,le);
-      else if(type===5)val=rRat(v,vo,le);
-      else if(type===10){const sn=v.getInt32(vo,le),sd=v.getInt32(vo+4,le);val=sd?sn/sd:0;}
-      else if(type===7&&tn.includes('Version')){val='';for(let j=0;j<num&&j<8;j++)val+=String.fromCharCode(v.getUint8((num>4?vo:off-4)+j));}
-    }catch{}
-    if(val!==undefined&&val!==null&&val!=='')res[tn]=val;
-  }
-}
-function parseEXIF(buf){
-  const v=new DataView(buf);const res={};let off=2;
-  while(off<v.byteLength-2){
-    const mk=v.getUint16(off);if(off+2>=v.byteLength)break;
-    const ln=v.getUint16(off+2);
-    if(mk===0xFFE1){
-      if(rStr(v,off+4,4)==='Exif'){
-        const t0=off+10,bo=v.getUint16(t0),le=bo===0x4949;
-        const ifd=v.getUint32(t0+4,le);
-        parseIFD(v,t0+ifd,le,ETAGS,res);
-        if(res.ExifIFD){parseIFD(v,t0+res.ExifIFD,le,ETAGS,res);delete res.ExifIFD;}
-        if(res.GPSIFD){const g={};parseIFD(v,t0+res.GPSIFD,le,GTAGS,g);delete res.GPSIFD;Object.assign(res,g);}
-      }break;
+function handleGPS(data) {
+    if(data.GPSLatitude) {
+        const lat = conv(data.GPSLatitude, data.GPSLatitudeRef);
+        const lon = conv(data.GPSLongitude, data.GPSLongitudeRef);
+        map.setView([lat, lon], 14);
+        if(marker) marker.remove();
+        marker = L.marker([lat, lon]).addTo(map);
+        document.getElementById('aiResult').innerText = `Konum: ${lat.toFixed(5)}, ${lon.toFixed(5)}. Cihaz: ${data.Make || 'Unknown'} ${data.Model || ''}`;
+    } else {
+        document.getElementById('aiResult').innerText = translations[lang]?.ai_none || "No GPS.";
     }
-    off+=2+ln;
-  }
-  return res;
-}
-function dms2dec(dms,ref){if(!Array.isArray(dms)||dms.length<3)return null;let d=dms[0]+dms[1]/60+dms[2]/3600;if(ref==='S'||ref==='W')d=-d;return d;}
-function fNum(n,d=2){return typeof n==='number'?n.toFixed(d):n;}
-function fExp(v){if(!v)return'—';if(v>=1)return fNum(v,1)+'s';return'1/'+Math.round(1/v)+'s';}
-
-// ══════════════════════════════════════════
-// ANALYSIS
-// ══════════════════════════════════════════
-function startAnalysis(file) {
-  document.getElementById('loading').classList.add('show');
-  document.getElementById('sumGrid').style.display = 'none';
-  document.getElementById('aiCard').style.display = 'none';
-  document.getElementById('paletteCard').style.display = 'none';
-  document.getElementById('exifSections').innerHTML = '';
-  document.getElementById('forgeryAlert').classList.remove('show');
-  const r = new FileReader();
-  r.onload = e => {
-    exifData = parseEXIF(e.target.result);
-    exifData._FileName = file.name;
-    exifData._FileSize = fSize(file.size);
-    exifData._FileType = file.type || 'image/jpeg';
-    exifData._Modified = new Date(file.lastModified).toLocaleString('tr-TR');
-    setTimeout(() => {
-      document.getElementById('loading').classList.remove('show');
-      checkForgery();
-      renderAnalysis();
-      renderGPS();
-      renderEditFields();
-    }, 350);
-  };
-  r.readAsArrayBuffer(file);
 }
 
-// ── Forgery check (orijinal logic geliştirilmiş) ──
-function checkForgery() {
-  const sw = (exifData.Software || '').toLowerCase();
-  const flags = [];
-  if (/photoshop|gimp|lightroom|canva|pixelmator|snapseed|vsco|facetune/i.test(sw))
-    flags.push(`Düzenleme yazılımı: ${exifData.Software}`);
-  if (exifData.DateTime && exifData.DateTimeOriginal && exifData.DateTime !== exifData.DateTimeOriginal)
-    flags.push('Tarih uyumsuzluğu tespit edildi');
-  if (!exifData.Make && !exifData.Model)
-    flags.push('Kamera bilgisi mevcut değil');
-  if (flags.length) {
-    document.getElementById('forgeryAlert').classList.add('show');
-    document.getElementById('forgeryBody').innerHTML = flags.map(f => `• ${f}`).join('<br>');
-  }
+function renderTable(data) {
+    const table = document.getElementById('metaTable');
+    table.innerHTML = "";
+    Object.entries(data).forEach(([k, v]) => {
+        if(typeof v !== 'object') {
+            table.innerHTML += `<tr><td class="meta-key">${k}</td><td class="meta-val">${v}</td></tr>`;
+        }
+    });
 }
 
-function renderAnalysis() {
-  // Summary
-  const sg = document.getElementById('sumGrid');
-  sg.style.display = 'grid';
-  const items = [
-    {icon:'📷',key:'Kamera',val:(exifData.Make||'')+(exifData.Model?' '+exifData.Model:'')},
-    {icon:'📐',key:'Çözünürlük',val:exifData.PixelXDimension&&exifData.PixelYDimension?`${exifData.PixelXDimension}×${exifData.PixelYDimension}`:'—'},
-    {icon:'📅',key:'Tarih',val:exifData.DateTimeOriginal||'—'},
-    {icon:'🔭',key:'Odak',val:exifData.FocalLength?fNum(exifData.FocalLength)+'mm':'—'},
-    {icon:'⚡',key:'ISO',val:exifData.PhotographicSensitivity||'—'},
-    {icon:'🔆',key:'Diyafram',val:exifData.FNumber?'f/'+fNum(exifData.FNumber):'—'},
-    {icon:'⏱',key:'Enstantane',val:fExp(exifData.ExposureTime)},
-    {icon:'💡',key:'Flaş',val:exifData.Flash!==undefined?(FMAP[exifData.Flash]||exifData.Flash):'—'},
-  ];
-  sg.innerHTML = items.map((s,i) =>
-    `<div class="sum-card fade-up" style="animation-delay:${i*35}ms">
-      <div class="sum-icon">${s.icon}</div>
-      <div class="sum-val">${s.val||'—'}</div>
-      <div class="sum-key">${s.key}</div>
-    </div>`).join('');
-
-  // AI
-  const qs = qualityScore(), fc = faceCount(), fp = forgeryRisk();
-  const hasAlpha = (exifData._FileType||'').includes('png');
-  document.getElementById('aiGrid').innerHTML = `
-    <div class="ai-card"><div class="ai-lbl">Kalite Skoru</div>
-      <div class="ai-score" style="color:${qs>70?'var(--a)':qs>40?'var(--yellow)':'var(--danger)'}">${qs}</div>
-      <div class="ai-sub">/100</div>
-      <div class="sbar"><div class="sbar-fill" style="width:${qs}%;background:${qs>70?'var(--a)':qs>40?'var(--yellow)':'var(--danger)'}"></div></div>
-    </div>
-    <div class="ai-card"><div class="ai-lbl">Yüz Tahmini</div>
-      <div class="ai-score" style="color:var(--a)">${fc}</div>
-      <div class="ai-sub">tahmini yüz</div>
-      <div class="sbar"><div class="sbar-fill" style="width:${Math.min(fc*25,100)}%;background:var(--a)"></div></div>
-    </div>
-    <div class="ai-card"><div class="ai-lbl">Şeffaflık</div>
-      <div class="ai-score" style="color:${hasAlpha?'var(--a)':'var(--text2)'}">${hasAlpha?'VAR':'YOK'}</div>
-      <div class="ai-sub">alpha kanal</div>
-    </div>
-    <div class="ai-card"><div class="ai-lbl">Sahtecilik</div>
-      <div class="ai-score" style="color:${fp.s<30?'var(--a)':fp.s<60?'var(--yellow)':'var(--danger)'}">${fp.s}%</div>
-      <div class="ai-sub">${fp.r}</div>
-      <div class="sbar"><div class="sbar-fill" style="width:${fp.s}%;background:${fp.s<30?'var(--a)':fp.s<60?'var(--yellow)':'var(--danger)'}"></div></div>
-    </div>`;
-  document.getElementById('aiCard').style.display = 'block';
-
-  // Palette & Histogram
-  if (canvasBuf) {
-    if (appCfg.hist) drawHistogram();
-    extractPalette();
-    document.getElementById('paletteCard').style.display = 'block';
-  }
-
-  // EXIF Sections
-  const sections = [
-    {icon:'📷',title:'Kamera',fields:[['Üretici','Make','ac'],['Model','Model','ac'],['Lens','LensModel','ac'],['Lens Marka','LensMake'],['Lens Seri','LensSerialNumber'],['Gövde Seri','BodySerialNumber'],['Yazılım','Software']]},
-    {icon:'⚙️',title:'Çekim Ayarları',fields:[['Poz Süresi','ExposureTime',null,fExp],['Diyafram','FNumber',null,v=>'f/'+fNum(v)],['ISO','PhotographicSensitivity','ye'],['Odak','FocalLength',null,v=>fNum(v)+'mm'],['35mm Eşd.','FocalLengthIn35mmFilm',null,v=>v+'mm'],['Flaş','Flash',null,v=>FMAP[v]||v],['Ölçüm','MeteringMode',null,v=>METER[v]||v],['Program','ExposureProgram',null,v=>EXPROG[v]||v],['Beyaz Denge','WhiteBalance',null,v=>WBM[v]||v],['Dijital Zoom','DigitalZoomRatio',null,v=>fNum(v)+'x'],['Poz Dengesi','ExposureBiasValue',null,v=>(v>0?'+':'')+fNum(v)+' EV'],['Parlaklık','BrightnessValue',null,v=>fNum(v)],['Kontrast','Contrast'],['Doygunluk','Saturation'],['Keskinlik','Sharpness']]},
-    {icon:'🖼',title:'Görüntü',fields:[['Genişlik','PixelXDimension','gr',v=>v+'px'],['Yükseklik','PixelYDimension','gr',v=>v+'px'],['Yönelim','Orientation',null,v=>ORI[v]||v],['Bit Derinliği','BitsPerSample'],['Sıkıştırma','Compression'],['Renk Uzayı','ColorSpace'],['X Çözünürlük','XResolution'],['Y Çözünürlük','YResolution'],['EXIF Ver.','ExifVersion']]},
-    {icon:'🕐',title:'Tarih & Saat',fields:[['Çekim','DateTimeOriginal','ac'],['Dijital','DateTimeDigitized'],['Değişiklik','DateTime']]},
-    {icon:'©️',title:'Telif & Meta',fields:[['Sanatçı','Artist'],['Telif','Copyright'],['Açıklama','ImageDescription'],['Sahip','CameraOwnerName'],['Benzersiz ID','ImageUniqueID']]},
-    {icon:'📁',title:'Dosya Bilgisi',fields:[['Ad','_FileName','ac'],['Boyut','_FileSize','gr'],['Tür','_FileType'],['Değişiklik','_Modified']]},
-  ];
-  const wrap = document.getElementById('exifSections');
-  wrap.innerHTML = '';
-  sections.forEach((sec, si) => {
-    const rows = sec.fields.map(([lbl,key,cls,fmt]) => {
-      let v = exifData[key];
-      if (v === undefined || v === null || v === '') return '';
-      if (fmt) try { v = fmt(v); } catch {}
-      if (v === '' || v === undefined) return '';
-      const vs = Array.isArray(v) ? v.map(x => typeof x === 'number' ? fNum(x) : x).join(', ') : String(v);
-      return `<div class="row"><div class="row-k">${lbl}</div><div class="row-v${cls?' '+cls:''}">${vs}</div><button class="row-copy" onclick="copyVal('${vs.replace(/'/g,'\\'')}')">⎘</button></div>`;
-    }).filter(Boolean);
-    if (!rows.length) return;
-    const d = document.createElement('div');
-    d.className = 'sec fade-up'; d.style.animationDelay = (si * 50 + 200) + 'ms';
-    d.innerHTML = `<div class="sec-h${si<2?' open':''}" onclick="toggleSec(this)"><span class="sec-icon">${sec.icon}</span><span class="sec-title">${sec.title}</span><span class="sec-badge">${rows.length}</span><span class="sec-arr">▾</span></div><div class="sec-b${si<2?' open':''}">${rows.join('')}</div>`;
-    wrap.appendChild(d);
-  });
+function conv(c, r) {
+    let d = c[0] + c[1]/60 + c[2]/3600;
+    return (r === "S" || r === "W") ? -d : d;
 }
 
-function toggleSec(h) { h.classList.toggle('open'); h.nextElementSibling.classList.toggle('open'); }
-function copyVal(v) { navigator.clipboard.writeText(v); showToast('Kopyalandı'); }
-
-function qualityScore() {
-  let s = 50;
-  if (exifData.PixelXDimension > 3000) s += 15; else if (exifData.PixelXDimension > 1500) s += 8;
-  if (exifData.FNumber) s += 10; if (exifData.ExposureTime) s += 8;
-  const iso = +exifData.PhotographicSensitivity;
-  if (iso) { if (iso < 800) s += 10; else if (iso < 3200) s += 5; else s -= 10; }
-  if (exifData.DateTimeOriginal) s += 5; if (exifData.LensModel) s += 5;
-  if (!exifData.Make) s -= 15;
-  return Math.min(100, Math.max(0, Math.round(s)));
-}
-function faceCount() {
-  const sc = exifData.SceneCaptureType;
-  if (sc === 3) return Math.floor(Math.random() * 3) + 1;
-  if (sc === 2) return Math.floor(Math.random() * 2) + 1;
-  return Math.random() > 0.6 ? 1 : 0;
-}
-function forgeryRisk() {
-  let s = 0, r = 'Temiz';
-  const sw = (exifData.Software || '').toLowerCase();
-  if (/photoshop|gimp|lightroom|canva|snapseed/.test(sw)) { s += 40; r = 'Düzenleme yazılımı'; }
-  if (exifData.DateTime && exifData.DateTimeOriginal && exifData.DateTime !== exifData.DateTimeOriginal) { s += 30; r = 'Tarih uyumsuz'; }
-  if (!exifData.Make && !exifData.Model) { s += 20; r = 'Kamera yok'; }
-  return { s: Math.min(100, s), r };
+function copyAll() {
+    const text = document.getElementById('metaTable').innerText;
+    navigator.clipboard.writeText(text);
+    alert("Kopyalandı!");
 }
 
-// ══════════════════════════════════════════
-// HISTOGRAM & PALETTE
-// ══════════════════════════════════════════
-function drawHistogram() {
-  const canvas = document.getElementById('histCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width = canvas.offsetWidth * window.devicePixelRatio || 300;
-  const H = canvas.height = 72 * window.devicePixelRatio || 72;
-  const ic = canvasBuf.getContext('2d');
-  const px = ic.getImageData(0, 0, canvasBuf.width, canvasBuf.height).data;
-  const rH = new Array(256).fill(0), gH = new Array(256).fill(0), bH = new Array(256).fill(0);
-  for (let i = 0; i < px.length; i += 4) { rH[px[i]]++; gH[px[i+1]]++; bH[px[i+2]]++; }
-  const max = Math.max(...rH, ...gH, ...bH);
-  ctx.fillStyle = 'rgba(0,0,0,0.4)'; ctx.fillRect(0, 0, W, H);
-  [[rH,'rgba(255,60,60,0.65)'],[gH,'rgba(60,255,120,0.65)'],[bH,'rgba(60,160,255,0.65)']].forEach(([h,col]) => {
-    ctx.beginPath(); ctx.moveTo(0, H);
-    for (let i = 0; i < 256; i++) ctx.lineTo(i * (W/256), (1 - h[i]/max) * H);
-    ctx.lineTo(W, H); ctx.closePath(); ctx.fillStyle = col; ctx.fill();
-  });
-}
-
-function extractPalette() {
-  const ic = canvasBuf.getContext('2d');
-  const px = ic.getImageData(0, 0, canvasBuf.width, canvasBuf.height).data;
-  const b = {};
-  for (let i = 0; i < px.length; i += 12) {
-    const r = Math.round(px[i]/32)*32, g = Math.round(px[i+1]/32)*32, bl = Math.round(px[i+2]/32)*32;
-    const k = `${r},${g},${bl}`; b[k] = (b[k]||0) + 1;
-  }
-  const top = Object.entries(b).sort((a,x) => x[1]-a[1]).slice(0,8);
-  document.getElementById('paletteEl').innerHTML = top.map(([c]) => {
-    const [r,g,bl] = c.split(',');
-    const hex = '#' + [r,g,bl].map(x => parseInt(x).toString(16).padStart(2,'0')).join('');
-    return `<div class="swatch" style="background:${hex}" title="${hex}" onclick="copyVal('${hex}');showToast('${hex}')"></div>`;
-  }).join('');
-}
-
-// ══════════════════════════════════════════
-// GPS
-// ══════════════════════════════════════════
-function renderGPS() {
-  lat = dms2dec(exifData.GPSLatitude, exifData.GPSLatitudeRef);
-  lon = dms2dec(exifData.GPSLongitude, exifData.GPSLongitudeRef);
-  const banner = document.getElementById('gpsBanner');
-  const noGps = document.getElementById('noGpsCard');
-  const locCard = document.getElementById('locHideCard');
-  if (lat !== null && lon !== null) {
-    banner.classList.add('show');
-    document.getElementById('gpsCoordsEl').textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
-    document.getElementById('mapBtn').onclick = () => window.open(`https://maps.google.com/?q=${lat},${lon}`, '_blank');
-    noGps.style.display = 'none';
-    locCard.style.display = 'block';
-    document.getElementById('gpsDetailWrap').innerHTML = `<div class="gc"><div class="gc-body">
-      <div class="row"><div class="row-k">Enlem</div><div class="row-v gr">${lat.toFixed(8)}</div><button class="row-copy" onclick="copyVal('${lat.toFixed(8)}')">⎘</button></div>
-      <div class="row"><div class="row-k">Boylam</div><div class="row-v gr">${lon.toFixed(8)}</div><button class="row-copy" onclick="copyVal('${lon.toFixed(8)}')">⎘</button></div>
-      <div class="row"><div class="row-k">Yükseklik</div><div class="row-v">${exifData.GPSAltitude?fNum(exifData.GPSAltitude)+'m':'—'}</div></div>
-      <div class="row"><div class="row-k">GPS Tarih</div><div class="row-v">${exifData.GPSDateStamp||'—'}</div></div>
-      <div class="row"><div class="row-k">Uydu</div><div class="row-v">${exifData.GPSSatellites||'—'}</div></div>
-      <div class="row" style="border:none"><div class="row-k">Datum</div><div class="row-v">${exifData.GPSMapDatum||'WGS-84'}</div></div>
-    </div></div>`;
-  } else {
-    banner.classList.remove('show'); noGps.style.display = 'block';
-    locCard.style.display = 'none'; document.getElementById('gpsDetailWrap').innerHTML = '';
-  }
-}
-
-function stripGPS() {
-  ['GPSLatitude','GPSLatitudeRef','GPSLongitude','GPSLongitudeRef','GPSAltitude','GPSAltitudeRef','GPSTimeStamp','GPSDateStamp','GPSSatellites'].forEach(k => delete exifData[k]);
-  lat = null; lon = null;
-  document.getElementById('locMsg').textContent = '✓ GPS verisi silindi';
-  document.getElementById('gpsBanner').classList.remove('show');
-  document.getElementById('noGpsCard').style.display = 'block';
-  document.getElementById('locHideCard').style.display = 'none';
-}
-function toggleFakeForm() { const f = document.getElementById('fakeForm'); f.style.display = f.style.display === 'none' ? 'block' : 'none'; }
-function applyFake() {
-  const la = parseFloat(document.getElementById('fakeLat').value), lo = parseFloat(document.getElementById('fakeLon').value);
-  if (isNaN(la) || isNaN(lo)) return;
-  exifData.GPSLatitude = [Math.abs(la),0,0]; exifData.GPSLatitudeRef = la >= 0 ? 'N' : 'S';
-  exifData.GPSLongitude = [Math.abs(lo),0,0]; exifData.GPSLongitudeRef = lo >= 0 ? 'E' : 'W';
-  lat = la; lon = lo;
-  document.getElementById('gpsCoordsEl').textContent = `${la.toFixed(6)}, ${lo.toFixed(6)}`;
-  document.getElementById('gpsBanner').classList.add('show');
-  document.getElementById('noGpsCard').style.display = 'none';
-  document.getElementById('locMsg').textContent = '✓ Sahte konum eklendi';
-  document.getElementById('fakeForm').style.display = 'none';
-}
-
-// ══════════════════════════════════════════
-// EDIT & EXPORT
-// ══════════════════════════════════════════
-function renderEditFields() {
-  if (!fileObj) return;
-  const fields = [['Make','Kamera Üretici'],['Model','Kamera Modeli'],['Software','Yazılım'],['Artist','Sanatçı'],['Copyright','Telif Hakkı'],['ImageDescription','Açıklama'],['DateTime','Tarih']];
-  document.getElementById('editFields').innerHTML = fields.map(([k,lbl]) =>
-    `<div style="margin-bottom:10px">
-      <label class="ef-label">${lbl}</label>
-      <input type="text" class="ef-input" value="${exifData[k]||''}" oninput="exifData['${k}']=this.value" placeholder="${lbl}…">
-    </div>`).join('') + `<button class="btn full sm" onclick="showToast('✓ Değişiklikler kaydedildi')">✓ Kaydet</button>`;
-}
-
-function flat() {
-  return Object.fromEntries(Object.entries(exifData).map(([k,v]) => [k, Array.isArray(v) ? v.map(x=>typeof x==='number'?fNum(x):x).join(', ') : v]));
-}
-function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();}
-function baseName(){return(fileName||'exif').replace(/\.\w+$/,'');}
-function exportJSON(){if(!fileObj){showToast('Fotoğraf yok');return;}dl(new Blob([JSON.stringify(flat(),null,2)],{type:'application/json'}),baseName()+'-exif.json');}
-function exportTXT(){if(!fileObj)return;dl(new Blob([Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n')],{type:'text/plain'}),baseName()+'-exif.txt');}
-function exportCSV(){if(!fileObj)return;dl(new Blob(['Key,Value\n'+Object.entries(flat()).map(([k,v])=>`"${k}","${String(v).replace(/"/g,'""')}"`).join('\n')],{type:'text/csv'}),baseName()+'-exif.csv');}
-function exportPDF(){
-  if(!fileObj)return;
-  const c=`provider.4 EXIF Raporu\n${'='.repeat(40)}\nDosya: ${exifData._FileName}\nKullanıcı: ${curUser}\nOluşturuldu: ${new Date().toLocaleString('tr-TR')}\n\n${Object.entries(flat()).map(([k,v])=>k.padEnd(28)+' '+v).join('\n')}`;
-  dl(new Blob([c],{type:'text/plain'}),baseName()+'-rapor.txt');
-}
-function copyMeta(){
-  if(!fileObj){showToast('Fotoğraf yok');return;}
-  navigator.clipboard.writeText(Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n'));
-  showToast('Tümü kopyalandı');
-}
-
-// ══════════════════════════════════════════
-// QR CODE
-// ══════════════════════════════════════════
-function generateQR() {
-  const summary = `p.4 EXIF\n${exifData._FileName||'—'}\n${(exifData.Make||'')+' '+(exifData.Model||'')}\n${exifData.DateTimeOriginal||'—'}\nGPS:${lat&&lon?`${lat.toFixed(4)},${lon.toFixed(4)}`:'N/A'}`;
-  const canvas = document.getElementById('qrCanvas');
-  const ctx = canvas.getContext('2d');
-  const S = 200; canvas.width = canvas.height = S;
-  ctx.fillStyle = '#111'; ctx.fillRect(0,0,S,S);
-  const bytes = [...summary].map(c=>c.charCodeAt(0));
-  let hash = 0; for (const b of bytes) hash = (hash*31+b)>>>0;
-  const rng = s => { s=(s^61)^(s>>>16);s+=s<<3;s^=s>>>4;s*=0x27d4eb2d;return((s^(s>>>15))>>>0)/0xffffffff; };
-  const M=21,cell=Math.floor((S-16)/M),off=Math.floor((S-M*cell)/2);
-  // Get current accent color
-  const ac = getComputedStyle(document.body).getPropertyValue('--a').trim() || '#00ff88';
-  ctx.fillStyle = ac;
-  for(let r=0;r<M;r++){for(let c=0;c<M;c++){
-    const inC=(r<7&&c<7)||(r<7&&c>=M-7)||(r>=M-7&&c<7);
-    if(inC){const er=r%7,ec=c%7;if(er===0||er===6||ec===0||ec===6||(er>=2&&er<=4&&ec>=2&&ec<=4))ctx.fillRect(off+c*cell,off+r*cell,cell,cell);continue;}
-    if(rng((hash+((r*M+c)*2654435761)>>>0)^(bytes[(r*M+c)%bytes.length]||0))>0.5)ctx.fillRect(off+c*cell,off+r*cell,cell,cell);
-  }}
-  ctx.fillStyle='rgba(0,0,0,0.8)';ctx.fillRect(S/2-36,S/2-9,72,18);
-  ctx.fillStyle=ac;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('provider.4',S/2,S/2+4);
-  showToast('QR üretildi');
-}
-
-// ══════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════
-function showToast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
-}
-
-// INIT
-applyTheme(appCfg.theme);
-document.getElementById('bigTxt').classList.toggle('on', appCfg.bigText);
-document.getElementById('histToggle').classList.toggle('on', appCfg.hist);
+if(sessionStorage.getItem('p4_auth') === 'true') startApp(sessionStorage.getItem('p4_user'));
 </script>
 </body>
 </html>
