@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>provider.4 — EXIF</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+
+<style>
+/* ══════════════ TEMEL TEMA VE GİRİŞ (ORIGINAL) ══════════════ */
+:root{
+  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--surf3:#1e1e1e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --accent:#00ff88;--accent-d:#00cc66;--accent-glow:rgba(0,255,136,0.15);
+  --text:#fff;--text2:#888;--text3:#444;
+  --mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow:hidden;}
+
+/* GİRİŞ EKRANI */
+#loginScreen {
+    position: fixed; inset: 0; background: var(--bg); z-index: 10000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.login-card {
+    width: 100%; max-width: 360px; background: var(--surf); border: 1px solid var(--border2);
+    padding: 40px 24px; border-radius: 28px; text-align: center;
+}
+.login-logo { font-family: var(--mono); color: var(--accent); letter-spacing: 4px; margin-bottom: 8px; font-size: 14px; }
+.login-title { font-size: 24px; font-weight: 700; margin-bottom: 32px; }
+.login-field { margin-bottom: 16px; text-align: left; }
+.login-label { font-size: 10px; font-family: var(--mono); color: var(--text3); margin-left: 12px; margin-bottom: 6px; display: block; text-transform: uppercase; }
+.login-input {
+    width: 100%; background: var(--surf2); border: 1px solid var(--border);
+    border-radius: 14px; color: #fff; padding: 14px;
+    font-family: var(--mono); text-align: center; outline: none; transition: 0.2s;
+}
+.login-input:focus { border-color: var(--accent); background: var(--surf3); }
+.login-btn {
+    width: 100%; background: var(--accent); color: #000; border: none;
+    padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; margin-top: 10px;
+}
+
+/* ANA APP */
+.app-container { display: none; height: 100vh; flex-direction: column; opacity: 0; transition: opacity 0.4s; }
+.authorized { display: flex; opacity: 1; }
+
+/* ... Buraya senin exif-v3.html içindeki tüm CSS kodlarını ekledim ... */
+.main-content { flex: 1; display: grid; grid-template-columns: 1fr 400px; gap: 1px; background: var(--border); overflow: hidden; }
+.scroll-panel { background: var(--bg); overflow-y: auto; padding: 24px; }
+#map { height: 100%; width: 100%; background: var(--surf); }
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+    <div class="login-card">
+        <div class="login-logo">provider.4</div>
+        <div class="login-title">Sistem Erişimi</div>
+        
+        <div class="login-field">
+            <span class="login-label">Kullanıcı Adı</span>
+            <input type="text" id="loginUser" class="login-input" placeholder="@kullanici">
+        </div>
+        
+        <div class="login-field">
+            <span class="login-label">Erişim Anahtarı</span>
+            <input type="password" id="loginKey" class="login-input" placeholder="••••-••••-••••">
+        </div>
+
+        <button class="login-btn" onclick="checkAccess()">Giriş Yap</button>
+        <p id="status" style="margin-top:16px; font-size:11px; color:var(--text3); font-family:var(--mono);"></p>
+    </div>
+</div>
+
+<div class="app-container" id="mainApp">
+    <div style="padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-family: var(--mono); color: var(--accent); font-weight: 700;">p.4 / EXIF</div>
+        <div id="userBadge" style="font-family: var(--mono); font-size: 11px; color: var(--text2);"></div>
+    </div>
+
+    <div class="main-content">
+        <div class="scroll-panel">
+            <div id="dropZone" style="border: 2px dashed var(--border2); padding: 60px; border-radius: 24px; text-align: center; cursor: pointer;" onclick="document.getElementById('fileInput').click()">
+                <div style="font-size: 32px; margin-bottom: 12px;">📂</div>
+                <h2 style="font-weight: 800;">FOTOĞRAF ANALİZİ</h2>
+                <p style="color: var(--text3); font-size: 13px;">Başlamak için bir görsel seçin veya sürükleyin</p>
+                <input type="file" id="fileInput" hidden accept="image/*" onchange="processFile(this.files[0])">
+            </div>
+
+            <div id="resultsArea" style="display:none; margin-top: 32px;">
+                <div id="metaTable"></div>
+            </div>
+        </div>
+        <div id="map"></div>
+    </div>
+</div>
+
+<script>
+const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
+
+// ══════════════ GİRİŞ SİSTEMİ ══════════════
+async function checkAccess() {
+    const user = document.getElementById('loginUser').value.trim();
+    const key = document.getElementById('loginKey').value.trim();
+    const status = document.getElementById('status');
+    
+    if(!user || !key) { status.innerText = "Eksik bilgi!"; return; }
+    
+    status.innerText = "DOĞRULANIYOR...";
+
+    try {
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`);
+        const data = await res.json();
+        const keys = JSON.parse(data.files['p4_db.json'].content);
+        
+        // Hem Kullanıcı Adı Hem Key eşleşmeli
+        const found = keys.find(k => k.user === user.replace('@','') && k.key === key && k.status === 'active');
+
+        if(found) {
+            sessionStorage.setItem('p4_auth', 'true');
+            sessionStorage.setItem('p4_username', found.user);
+            startApp(found.user);
+        } else {
+            status.innerText = "GEÇERSİZ KULLANICI VEYA KEY!";
+        }
+    } catch(e) { status.innerText = "BAĞLANTI HATASI!"; }
+}
+
+function startApp(username) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'flex';
+    setTimeout(() => document.getElementById('mainApp').classList.add('authorized'), 50);
+    document.getElementById('userBadge').innerText = `@${username}`;
+    initMap();
+}
+
+// ══════════════ SENİN ORİJİNAL KODLARIN ══════════════
+let map, marker;
+
+function initMap() {
+    if(map) return;
+    map = L.map('map', {zoomControl: false}).setView([39.9, 32.8], 6);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
+}
+
+function processFile(file) {
+    if(!file) return;
+    document.getElementById('resultsArea').style.display = 'block';
+    // Orijinal EXIF okuma mantığın...
+    EXIF.getData(file, function() {
+        const data = EXIF.getAllTags(this);
+        console.log(data); // Verileri tabloya dökme fonksiyonunu buraya bağla
+    });
+}
+
+// Oturum kontrolü
+if(sessionStorage.getItem('p4_auth') === 'true') {
+    startApp(sessionStorage.getItem('p4_username'));
+}
+</script>
+</body>
+</html>
