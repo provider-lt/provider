@@ -3,214 +3,216 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<title>provider.4 — ULTIMATE EXIF</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>provider.4 — EXIF ULTIMATE</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
+/* ══════════════ GİRİŞ EKRANI (ŞIK TASARIM) ══════════════ */
 :root{
-  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--border:rgba(255,255,255,0.07);
-  --accent:#00ff88;--text:#fff;--text2:#888;--danger:#ff3355;--mono:'Space Mono',monospace;
+  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--surf3:#1e1e1e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --a:#00ff88;--a-glow:rgba(0,255,136,0.15);
+  --danger:#ff3355;--text:#fff;--text2:#888;--mono:'Space Mono',monospace;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;height:100vh;overflow:hidden;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;min-height:100vh;overflow-x:hidden;}
 
-/* LOGIN & LANG */
-#loginScreen { position:fixed; inset:0; background:var(--bg); z-index:10000; display:flex; align-items:center; justify-content:center; }
-.login-card { width:100%; max-width:360px; background:var(--surf); border:1px solid var(--border); padding:40px 24px; border-radius:28px; text-align:center; }
-.lang-selector { margin-bottom: 20px; background: var(--surf2); color: var(--text); border: 1px solid var(--border); padding: 8px; border-radius: 8px; font-family: var(--mono); cursor: pointer; }
+#loginScreen {
+    position:fixed; inset:0; background:var(--bg); z-index:99999;
+    display:flex; align-items:center; justify-content:center;
+    background-image: radial-gradient(circle at 50% 50%, #0a1510 0%, #000 100%);
+}
+.login-card {
+    width:100%; max-width:380px; background:rgba(13,13,13,0.8); border:1px solid var(--border);
+    padding:48px 32px; border-radius:32px; text-align:center; backdrop-filter: blur(20px);
+}
+.login-logo { font-family:var(--mono); color:var(--a); letter-spacing:6px; font-size:14px; margin-bottom:12px; font-weight:800; }
+.login-input {
+    width:100%; background:var(--surf2); border:1px solid var(--border);
+    border-radius:16px; color:#fff; padding:16px; font-family:var(--mono);
+    outline:none; transition:0.3s; text-align:center; margin-bottom:12px; font-size:14px;
+}
+.login-btn {
+    width:100%; background:var(--a); color:#000; border:none;
+    padding:18px; border-radius:16px; font-weight:900; cursor:pointer; transition:0.3s;
+}
+.login-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--a-glow); }
 
-/* APP LAYOUT */
-.app-container { display:none; height:100vh; grid-template-columns: 480px 1fr; }
-.authorized { display:grid; }
-.sidebar { background:var(--surf); border-right:1px solid var(--border); overflow-y:auto; padding:24px; display:flex; flex-direction:column; gap:20px; }
-#map { flex:1; }
+/* ══════════════ ANA TOOL TASARIMI (ORİJİNAL) ══════════════ */
+.app-container { display:none; max-width:900px; margin:0 auto; padding:40px 20px; }
+.authorized { display:block !important; animation: fadeIn 0.5s ease; }
 
-/* COMPONENTS */
-#dropZone { border:2px dashed var(--border); border-radius:20px; padding:40px 20px; text-align:center; cursor:pointer; }
-.status-badge { display:inline-block; padding:4px 8px; border-radius:6px; font-size:10px; font-family:var(--mono); font-weight:bold; margin-bottom:10px; }
-.forgery-alert { background:rgba(255,51,85,0.1); border:1px solid var(--danger); color:var(--danger); padding:15px; border-radius:12px; margin-bottom:15px; display:none; }
-.meta-table { width:100%; border-collapse:collapse; margin-top:20px; font-family:var(--mono); font-size:12px; }
-.meta-table td { padding:10px; border-bottom:1px solid var(--border); }
-.meta-key { color:var(--text2); }
-.meta-val { color:var(--accent); text-align:right; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:40px; }
+#dropZone {
+    background:var(--surf); border:2px dashed var(--border2); border-radius:24px;
+    padding:80px 20px; text-align:center; cursor:pointer; transition:0.3s;
+}
+#dropZone:hover { border-color:var(--a); background:rgba(0,255,136,0.02); }
 
-.action-btn { background:var(--surf2); color:var(--text); border:1px solid var(--border); padding:8px 12px; border-radius:8px; cursor:pointer; font-size:11px; margin-right:5px; transition: 0.2s; }
-.action-btn:hover { border-color: var(--accent); color: var(--accent); }
+.forgery-card {
+    background:rgba(255,51,85,0.05); border:1px solid var(--danger);
+    padding:20px; border-radius:20px; margin:24px 0; display:none;
+}
+.ai-card { background:var(--surf); border:1px solid var(--border); padding:24px; border-radius:20px; margin:24px 0; }
 
-@media (max-width:1000px) { .app-container { grid-template-columns: 1fr; } .sidebar { height: 60vh; } }
+.meta-table { width:100%; border-collapse:collapse; margin-top:20px; }
+.meta-table td { padding:14px; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:13px; }
+.meta-key { color:var(--text2); width:40%; }
+.meta-val { color:var(--a); text-align:right; word-break:break-all; }
+
+.btn-row { display:flex; gap:10px; margin-top:20px; flex-wrap:wrap; }
+.tool-btn {
+    background:var(--surf2); color:var(--text); border:1px solid var(--border);
+    padding:10px 20px; border-radius:12px; cursor:pointer; font-size:12px; font-weight:600;
+}
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
 </style>
 </head>
 <body>
 
 <div id="loginScreen">
     <div class="login-card">
-        <select id="langSelect" class="lang-selector" onchange="updateLang()">
-            <option value="tr">TR - Türkçe</option>
-            <option value="en">EN - English</option>
-            <option value="de">DE - Deutsch</option>
-            <option value="fr">FR - Français</option>
-            <option value="es">ES - Español</option>
-            <option value="ru">RU - Русский</option>
-            <option value="it">IT - Italiano</option>
-            <option value="pt">PT - Português</option>
-            <option value="ar">AR - العربية</option>
-            <option value="zh">ZH - 中文</option>
-        </select>
-        <h2 id="loginTitle" style="margin-bottom:20px; letter-spacing:2px; color:var(--accent)">provider.4</h2>
-        <input type="text" id="loginUser" class="login-input" style="width:100%; background:var(--surf2); border:1px solid var(--border); border-radius:12px; color:#fff; padding:14px; margin-bottom:12px; text-align:center; outline:none;" placeholder="User">
-        <input type="password" id="loginKey" class="login-input" style="width:100%; background:var(--surf2); border:1px solid var(--border); border-radius:12px; color:#fff; padding:14px; margin-bottom:12px; text-align:center; outline:none;" placeholder="Key">
-        <button id="loginBtn" class="login-btn" onclick="checkAccess()">LOGIN</button>
-        <p id="status" style="color:#444; font-size:11px; margin-top:15px; font-family:var(--mono)"></p>
+        <div class="login-logo">PROVIDER.4</div>
+        <h1 style="font-size:26px; margin-bottom:32px;">Sistem Erişimi</h1>
+        <input type="text" id="loginUser" class="login-input" placeholder="Kullanıcı Adı">
+        <input type="password" id="loginKey" class="login-input" placeholder="••••-••••-••••">
+        <button class="login-btn" onclick="checkAccess()">OTURUM AÇ</button>
+        <p id="status" style="margin-top:20px; font-size:11px; color:#444; font-family:var(--mono);"></p>
     </div>
 </div>
 
 <div class="app-container" id="mainApp">
-    <div class="sidebar">
-        <div style="display:flex; justify-content:space-between; align-items:center">
-            <span style="font-family:var(--mono); color:var(--accent); font-weight:bold">P.4_ULTIMATE</span>
-            <span id="userBadge" style="font-size:10px; opacity:0.5"></span>
-        </div>
-
-        <div id="dropZone" onclick="document.getElementById('fileInput').click()">
-            <div style="font-size:30px">📸</div>
-            <h3 id="ui_uploadTitle">Dosya Yükle</h3>
-            <p id="ui_uploadSub" style="font-size:12px; color:var(--text2)">Sürükle veya seç</p>
-            <input type="file" id="fileInput" hidden accept="image/*" onchange="processFile(this.files[0])">
-        </div>
-
-        <div id="forgeryAlert" class="forgery-alert">
-            <strong id="ui_forgeryTitle">⚠️ DİKKAT: SAHTECİLİK TESPİT EDİLDİ</strong><br>
-            <span id="ui_forgeryMsg" style="font-size:12px;">Bu görsel yazılımsal müdahale (Photoshop/Editing) izleri taşıyor.</span>
-        </div>
-
-        <div id="infoArea" style="display:none">
-            <div style="display:flex; gap:5px; margin-bottom:15px;">
-                <button class="action-btn" onclick="exportPDF()">PDF</button>
-                <button class="action-btn" onclick="exportCSV()">CSV</button>
-                <button class="action-btn" onclick="copyAll()">COPY ALL</button>
-            </div>
-            
-            <div id="aiBox" style="background:var(--surf2); padding:15px; border-radius:12px; margin-bottom:15px">
-                <span style="font-size:10px; color:var(--accent); font-family:var(--mono)">AI_REPORT:</span>
-                <p id="aiResult" style="font-size:13px; margin-top:5px; color:#ccc">Waiting...</p>
-            </div>
-            
-            <table class="meta-table" id="metaTable"></table>
-        </div>
+    <div class="header">
+        <h2 style="font-weight:800; letter-spacing:-1px;">EXIF <span style="color:var(--a)">ANALYZER</span></h2>
+        <div id="userBadge" style="font-family:var(--mono); font-size:12px; color:var(--a)"></div>
     </div>
-    <div id="map"></div>
+
+    <div id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <div style="font-size:48px; margin-bottom:16px;">📸</div>
+        <h3 style="font-size:20px;">Görseli Buraya Bırakın</h3>
+        <p style="color:var(--text2); margin-top:8px;">Veya seçmek için tıklayın</p>
+        <input type="file" id="fileInput" hidden accept="image/*" onchange="processFile(this.files[0])">
+    </div>
+
+    <div id="results" style="display:none;">
+        <div id="forgeryAlert" class="forgery-card">
+            <h4 style="color:var(--danger); margin-bottom:8px;">⚠️ YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</h4>
+            <p id="forgeryDetails" style="font-size:13px; opacity:0.8;"></p>
+        </div>
+
+        <div class="btn-row">
+            <button class="tool-btn" onclick="exportPDF()">PDF RAPOR</button>
+            <button class="tool-btn" onclick="exportCSV()">CSV DIŞA AKTAR</button>
+            <button class="tool-btn" onclick="copyMeta()">METİNLERİ KOPYALA</button>
+        </div>
+
+        <div class="ai-card">
+            <span style="font-family:var(--mono); font-size:10px; color:var(--a); letter-spacing:2px;">AI_LOKASYON_VE_CIHAZ_RAPORU</span>
+            <p id="aiReport" style="margin-top:12px; line-height:1.6; font-size:14px; color:#ccc;"></p>
+        </div>
+
+        <table class="meta-table" id="metaTable"></table>
+    </div>
 </div>
 
 <script>
+// ════════ KONFİGÜRASYON ════════
 const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
-let map, marker, lang = 'tr';
+let exifData = {};
 
-const translations = {
-    tr: { login: "GİRİŞ YAP", user: "Kullanıcı", key: "Anahtar", upload: "Görsel Yükle", sub: "Sürükle veya seç", forgery: "SAHTECİLİK TESPİT EDİLDİ", ai_wait: "Analiz bekleniyor...", ai_none: "Konum verisi yok." },
-    en: { login: "LOGIN", user: "Username", key: "Access Key", upload: "Upload Image", sub: "Drag or select", forgery: "FORGERY DETECTED", ai_wait: "Waiting for analysis...", ai_none: "No location data found." },
-    de: { login: "ANMELDEN", user: "Benutzer", key: "Schlüssel", upload: "Bild hochladen", sub: "Ziehen oder wählen", forgery: "FÄLSCHUNG ERKANNT", ai_wait: "Warten auf Analyse...", ai_none: "Keine Standortdaten." }
-    // Diğer diller buraya kısa diziler halinde eklenebilir...
-};
-
-function updateLang() {
-    lang = document.getElementById('langSelect').value;
-    const t = translations[lang] || translations.en;
-    document.getElementById('loginBtn').innerText = t.login;
-    document.getElementById('loginUser').placeholder = t.user;
-    document.getElementById('loginKey').placeholder = t.key;
-    document.getElementById('ui_uploadTitle').innerText = t.upload;
-    document.getElementById('ui_uploadSub').innerText = t.sub;
-}
-
+// ════════ KEY API KONTROLÜ (GIST) ════════
 async function checkAccess() {
     const user = document.getElementById('loginUser').value.trim();
     const key = document.getElementById('loginKey').value.trim();
+    const status = document.getElementById('status');
     if(!user || !key) return;
+    status.innerText = "YETKİ SORGULANIYOR...";
     try {
-        const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`);
+        // Cache bypass için timestamp ekledik
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, { cache: "no-store" });
         const data = await res.json();
         const keys = JSON.parse(data.files['p4_db.json'].content);
-        const found = keys.find(k => k.user === user && k.key === key && k.status === 'active');
+        // User ve Key eşleşmesi
+        const found = keys.find(k => String(k.user) === user && String(k.key) === key && k.status === 'active');
         if(found) {
             sessionStorage.setItem('p4_auth', 'true');
-            sessionStorage.setItem('p4_user', found.user);
-            startApp(found.user);
-        } else { alert("Hatalı Key!"); }
-    } catch(e) { console.error(e); }
+            sessionStorage.setItem('p4_name', found.user);
+            showApp(found.user);
+        } else { status.innerText = "❌ GEÇERSİZ KİMLİK BİLGİLERİ!"; }
+    } catch(e) { status.innerText = "⚠️ BAĞLANTI HATASI!"; console.error(e); }
 }
 
-function startApp(u) {
+function showApp(name) {
     document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').classList.add('authorized');
-    document.getElementById('userBadge').innerText = `@${u}`;
-    initMap();
+    const app = document.getElementById('mainApp');
+    app.classList.add('authorized');
+    document.getElementById('userBadge').innerText = `@${name}`;
 }
 
-function initMap() {
-    if(map) return;
-    map = L.map('map', {zoomControl: false}).setView([20, 0], 2);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png').addTo(map);
-}
-
+// ════════ EXIF İŞLEME (TÜM FONKSİYONLAR) ════════
 function processFile(file) {
     if(!file) return;
-    document.getElementById('infoArea').style.display = 'block';
-    
-    // Sahtecilik Algılama Mantığı (Software kontrolü)
+    document.getElementById('results').style.display = 'block';
     EXIF.getData(file, function() {
-        const all = EXIF.getAllTags(this);
-        const software = all.Software || "";
+        exifData = EXIF.getAllTags(this);
+        // Sahtecilik Kontrolü
+        const soft = exifData.Software || "";
         const alertBox = document.getElementById('forgeryAlert');
-        
-        if(software.match(/Adobe|Photoshop|GIMP|Pixelmator|Canva/i)) {
+        if(soft.match(/Adobe|Photoshop|GIMP|Canva|Pixelmator|Lightroom/i)) {
             alertBox.style.display = 'block';
-        } else {
-            alertBox.style.display = 'none';
-        }
+            document.getElementById('forgeryDetails').innerText = `Tespit edilen yazılım: ${soft}. Bu görsel orijinal olmayabilir.`;
+        } else { alertBox.style.display = 'none'; }
 
-        renderTable(all);
-        handleGPS(all);
-    });
-}
+        // AI & GPS Raporu
+        let report = `<b>Cihaz:</b> ${exifData.Make || 'Belirsiz'} ${exifData.Model || ''}<br>`;
+        if(exifData.GPSLatitude) {
+            const lat = convert(exifData.GPSLatitude, exifData.GPSLatitudeRef);
+            const lon = convert(exifData.GPSLongitude, exifData.GPSLongitudeRef);
+            report += `<b>Konum:</b> ${lat.toFixed(6)}, ${lon.toFixed(6)}<br><b>Harita Linki:</b> <a href="https://www.google.com/maps?q=${lat},${lon}" target="_blank" style="color:var(--a)">Google Maps</a>`;
+        } else { report += `<b>Konum:</b> GPS verisi bulunamadı.`; }
+        document.getElementById('aiReport').innerHTML = report;
 
-function handleGPS(data) {
-    if(data.GPSLatitude) {
-        const lat = conv(data.GPSLatitude, data.GPSLatitudeRef);
-        const lon = conv(data.GPSLongitude, data.GPSLongitudeRef);
-        map.setView([lat, lon], 14);
-        if(marker) marker.remove();
-        marker = L.marker([lat, lon]).addTo(map);
-        document.getElementById('aiResult').innerText = `Konum: ${lat.toFixed(5)}, ${lon.toFixed(5)}. Cihaz: ${data.Make || 'Unknown'} ${data.Model || ''}`;
-    } else {
-        document.getElementById('aiResult').innerText = translations[lang]?.ai_none || "No GPS.";
-    }
-}
-
-function renderTable(data) {
-    const table = document.getElementById('metaTable');
-    table.innerHTML = "";
-    Object.entries(data).forEach(([k, v]) => {
-        if(typeof v !== 'object') {
+        // Tabloyu Yaz
+        const table = document.getElementById('metaTable');
+        table.innerHTML = "";
+        Object.entries(exifData).forEach(([k, v]) => {
+            if(typeof v === 'object' || typeof v === 'function') return;
             table.innerHTML += `<tr><td class="meta-key">${k}</td><td class="meta-val">${v}</td></tr>`;
-        }
+        });
     });
 }
 
-function conv(c, r) {
+function convert(c, r) {
     let d = c[0] + c[1]/60 + c[2]/3600;
     return (r === "S" || r === "W") ? -d : d;
 }
 
-function copyAll() {
-    const text = document.getElementById('metaTable').innerText;
+// ════════ EXPORT & UTILS ════════
+function copyMeta() {
+    const text = Object.entries(exifData).map(([k,v])=>`${k}: ${v}`).join('\n');
     navigator.clipboard.writeText(text);
     alert("Kopyalandı!");
 }
+function exportCSV() {
+    const csv = "Key,Value\n" + Object.entries(exifData).map(([k,v])=>`"${k}","${v}"`).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "exif.csv"; a.click();
+}
+function exportPDF() {
+    const content = `P4 EXIF RAPORU\n${Object.entries(exifData).map(([k,v])=>k+": "+v).join('\n')}`;
+    const blob = new Blob([content], {type:'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = "exif-rapor.txt"; a.click();
+}
 
-if(sessionStorage.getItem('p4_auth') === 'true') startApp(sessionStorage.getItem('p4_user'));
+// Oturum Koruma
+if(sessionStorage.getItem('p4_auth') === 'true') showApp(sessionStorage.getItem('p4_name'));
 </script>
 </body>
 </html>
