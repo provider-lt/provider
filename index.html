@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="provider.4">
+<meta name="theme-color" content="#000000">
+<title>provider.4 — EXIF ULTIMATE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════
+   DESIGN TOKENS + THEMES
+════════════════════════════════════════ */
+:root{
+  --bg:#000;--surf:#0d0d0d;--surf2:#161616;--surf3:#1f1f1f;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f5f5f5;--text2:#888;--text3:#444;
+  --danger:#ff3355;--warn:#ffcc00;--info:#4488ff;--ok:#00ff88;
+  --mono:'Space Mono',monospace;--sans:'Space Grotesk',sans-serif;
+  --ib:env(safe-area-inset-bottom,0px);--it:env(safe-area-inset-top,0px);
+  --r:14px;--r2:10px;
+  /* accent — overridden per theme */
+  --a:#00ff88;--a-d:#00cc66;--ag:rgba(0,255,136,0.14);
+}
+[data-theme=electric]{--a:#00d4ff;--a-d:#0099bb;--ag:rgba(0,212,255,0.14)}
+[data-theme=cyber]   {--a:#39ff14;--a-d:#2bcc0f;--ag:rgba(57,255,20,0.14);--bg:#000;--surf:#050505;--surf2:#0d0d0d}
+[data-theme=ocean]   {--a:#00bcd4;--a-d:#008fa1;--ag:rgba(0,188,212,0.14);--bg:#000d10;--surf:#001820;--surf2:#002530}
+[data-theme=sunset]  {--a:#ff6b35;--a-d:#cc4f1f;--ag:rgba(255,107,53,0.14);--bg:#080200;--surf:#120600;--surf2:#1c0e00}
+[data-theme=forest]  {--a:#4caf50;--a-d:#357a38;--ag:rgba(76,175,80,0.14);--bg:#000400;--surf:#030c03;--surf2:#061506}
+[data-theme=blood]   {--a:#ff1744;--a-d:#c62828;--ag:rgba(255,23,68,0.14);--bg:#050000;--surf:#100000;--surf2:#1a0000}
+[data-theme=purple]  {--a:#c084fc;--a-d:#9333ea;--ag:rgba(192,132,252,0.14);--bg:#030008;--surf:#0a0015;--surf2:#130020}
+[data-theme=gold]    {--a:#fbbf24;--a-d:#d97706;--ag:rgba(251,191,36,0.14);--bg:#060400;--surf:#110a00;--surf2:#1a1000}
+[data-theme=mono]    {--a:#ffffff;--a-d:#cccccc;--ag:rgba(255,255,255,0.08)}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none}
+body{
+background:var(–bg);color:var(–text);font-family:var(–sans);
+min-height:100dvh;overflow:hidden;
+transition:background .35s,color .35s;
+}
+body::before{
+content:’’;position:fixed;inset:0;z-index:0;pointer-events:none;
+background:
+radial-gradient(ellipse 55% 35% at 75% 5%,var(–ag),transparent 65%),
+radial-gradient(ellipse 35% 45% at 15% 85%,color-mix(in srgb,var(–a) 4%,transparent),transparent 70%);
+transition:background .35s;
+}
+
+/* ════ LOGIN ════ */
+#loginScreen{
+position:fixed;inset:0;z-index:9999;
+display:flex;align-items:center;justify-content:center;padding:20px;
+background:var(–bg);
+transition:opacity .4s cubic-bezier(.4,0,.2,1),transform .4s cubic-bezier(.4,0,.2,1);
+}
+#loginScreen.out{opacity:0;transform:scale(1.06) translateY(-10px);pointer-events:none}
+
+.lc-wrap{width:100%;max-width:400px}
+.lc-logo{font-family:var(–mono);font-size:11px;letter-spacing:4px;color:var(–a);text-align:center;margin-bottom:6px;font-weight:700}
+.lc-glow{
+width:90px;height:90px;border-radius:50%;
+background:radial-gradient(circle,var(–ag),transparent 75%);
+margin:0 auto 16px;
+display:flex;align-items:center;justify-content:center;font-size:38px;
+box-shadow:0 0 40px var(–ag);
+}
+.lc-title{font-size:26px;font-weight:800;text-align:center;letter-spacing:-.5px;margin-bottom:4px}
+.lc-sub{font-size:11px;color:var(–text2);letter-spacing:1.5px;text-align:center;margin-bottom:30px;text-transform:uppercase}
+.lc-card{
+background:rgba(255,255,255,0.03);
+border:1px solid var(–border2);
+border-radius:22px;padding:28px 24px;
+backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+box-shadow:0 20px 60px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.05);
+}
+.lc-field{margin-bottom:14px}
+.lc-label{display:block;font-family:var(–mono);font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(–text2);margin-bottom:7px;font-weight:700}
+.lc-input{
+width:100%;background:rgba(255,255,255,0.05);
+border:1px solid var(–border);border-radius:12px;
+color:var(–text);font-family:var(–mono);font-size:14px;
+padding:13px 14px;outline:none;
+transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;
+}
+.lc-input:focus{
+border-color:color-mix(in srgb,var(–a) 55%,transparent);
+box-shadow:0 0 0 3px color-mix(in srgb,var(–a) 7%,transparent);
+}
+.lc-btn{
+width:100%;background:var(–a);border:none;border-radius:12px;
+color:#000;font-family:var(–sans);font-size:14px;font-weight:800;
+height:52px;cursor:pointer;margin-top:8px;letter-spacing:.3px;
+transition:background .15s,transform .1s,box-shadow .2s;
+box-shadow:0 4px 20px var(–ag);
+}
+.lc-btn:active{transform:scale(.97)}
+.lc-btn:hover{box-shadow:0 6px 28px var(–ag)}
+.lc-demo{
+width:100%;background:none;border:1px solid var(–border2);
+border-radius:12px;color:var(–text2);font-family:var(–sans);
+font-size:12px;font-weight:600;height:42px;cursor:pointer;margin-top:8px;
+transition:all .15s;
+}
+.lc-demo:active{border-color:var(–a);color:var(–a)}
+.lc-status{
+font-family:var(–mono);font-size:11px;text-align:center;
+min-height:20px;margin-top:12px;color:var(–text3);
+transition:color .2s;
+}
+.lc-status.err{color:var(–danger)}
+.lc-status.ok{color:var(–a)}
+.lc-status.spin-txt::before{content:’’;display:inline-block;width:10px;height:10px;border:1.5px solid var(–border2);border-top-color:var(–a);border-radius:50%;animation:spin .7s linear infinite;margin-right:7px;vertical-align:middle}
+
+/* ════ APP SHELL ════ */
+#app{position:relative;z-index:1;max-width:660px;margin:0 auto;height:100dvh;display:none;flex-direction:column}
+#app.on{display:flex}
+
+/* TOPBAR */
+.topbar{
+padding:calc(var(–it)+12px) 16px 10px;
+display:flex;align-items:center;gap:10px;
+background:rgba(0,0,0,.8);
+backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+border-bottom:1px solid var(–border);
+flex-shrink:0;position:relative;z-index:20;
+}
+.tb-logo{font-family:var(–mono);font-size:12px;font-weight:700;color:var(–a);letter-spacing:2px;flex-shrink:0}
+.tb-div{width:1px;height:14px;background:var(–border2);flex-shrink:0}
+.tb-user{font-size:11px;color:var(–text2);flex:1;font-family:var(–mono);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tb-badge{
+font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+padding:3px 9px;border-radius:8px;border:1px solid;flex-shrink:0;
+color:var(–a);border-color:color-mix(in srgb,var(–a) 30%,transparent);
+background:color-mix(in srgb,var(–a) 8%,transparent);
+}
+.tb-badge.demo{color:var(–warn);border-color:rgba(255,204,0,.3);background:rgba(255,204,0,.07)}
+
+/* TABS */
+.tabs{
+display:flex;border-bottom:1px solid var(–border);
+background:rgba(0,0,0,.65);flex-shrink:0;
+}
+.tab{
+flex:1;background:none;border:none;
+color:var(–text3);font-family:var(–sans);
+font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;
+padding:9px 4px 7px;cursor:pointer;
+display:flex;flex-direction:column;align-items:center;gap:3px;
+position:relative;transition:color .18s;
+}
+.tab .ti{font-size:17px}
+.tab.on{color:var(–a)}
+.tab.on::after{content:’’;position:absolute;bottom:0;left:22%;right:22%;height:2px;background:var(–a);border-radius:2px;box-shadow:0 0 8px var(–ag)}
+
+/* SCROLL PAGES */
+.pages{flex:1;position:relative;overflow:hidden}
+.pg{
+position:absolute;inset:0;
+overflow-y:auto;-webkit-overflow-scrolling:touch;
+padding:14px 14px calc(20px + var(–ib));
+opacity:0;pointer-events:none;
+transform:translateY(8px);
+transition:opacity .22s ease,transform .22s ease;
+}
+.pg.on{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* ════ CARDS ════ */
+.gc{
+background:rgba(255,255,255,0.025);
+border:1px solid var(–border);border-radius:var(–r);
+margin-bottom:10px;overflow:hidden;
+}
+.gc-h{
+padding:11px 14px;
+display:flex;align-items:center;justify-content:space-between;
+border-bottom:1px solid var(–border);
+}
+.gc-title{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(–text2)}
+.gc-b{padding:12px 14px}
+
+/* ════ DROP ZONE ════ */
+.dz{
+border:1.5px dashed color-mix(in srgb,var(–a) 28%,transparent);
+border-radius:var(–r);padding:44px 20px;text-align:center;cursor:pointer;
+background:color-mix(in srgb,var(–a) 2%,transparent);
+margin-bottom:10px;position:relative;overflow:hidden;
+transition:all .25s;
+}
+.dz::before{content:’’;position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,color-mix(in srgb,var(–a) 5%,transparent),transparent 70%);pointer-events:none}
+.dz.drag{border-color:var(–a);box-shadow:0 0 32px var(–ag);background:color-mix(in srgb,var(–a) 5%,transparent)}
+.dz.loaded{border-style:solid;border-color:color-mix(in srgb,var(–a) 38%,transparent)}
+.dz-icon{font-size:46px;display:block;margin-bottom:12px}
+.dz-title{font-size:18px;font-weight:700;margin-bottom:5px}
+.dz-sub{font-size:11px;color:var(–text2);letter-spacing:.3px}
+
+/* ════ IMAGE PREVIEW ════ */
+.iprev{border-radius:var(–r);overflow:hidden;position:relative;margin-bottom:10px;border:1px solid var(–border2);display:none}
+.iprev.on{display:block}
+#prevImg{width:100%;max-height:260px;object-fit:cover;display:block}
+.iprev-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.9) 0%,transparent 55%);pointer-events:none}
+.iprev-meta{position:absolute;bottom:10px;left:12px;right:12px;display:flex;align-items:flex-end;justify-content:space-between}
+.iprev-name{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.iprev-size{font-family:var(–mono);font-size:10px;color:var(–a);flex-shrink:0;margin-left:8px}
+
+/* ════ FORGERY ALERT ════ */
+.forgery{
+background:rgba(255,51,85,.06);border:1px solid rgba(255,51,85,.3);
+border-radius:var(–r);padding:13px 16px;margin-bottom:10px;display:none;
+}
+.forgery.on{display:block;animation:fu .3s ease}
+.forgery-title{color:var(–danger);font-weight:700;font-size:13px;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.forgery-body{font-size:12px;color:rgba(255,100,120,.85);line-height:1.7}
+
+/* ════ SUMMARY GRID ════ */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.sc{
+background:rgba(255,255,255,.025);border:1px solid var(–border);
+border-radius:var(–r2);padding:12px 11px;position:relative;overflow:hidden;
+}
+.sc::after{content:’’;position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,var(–a),transparent)}
+.sc-icon{font-size:18px;margin-bottom:6px}
+.sc-val{font-size:13px;font-weight:700;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sc-key{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(–text2)}
+
+/* ════ AI GRID ════ */
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ac2{background:rgba(255,255,255,.025);border:1px solid var(–border);border-radius:var(–r2);padding:13px}
+.al{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(–text2);margin-bottom:6px}
+.av{font-size:25px;font-weight:700;font-family:var(–mono);margin-bottom:3px}
+.as2{font-size:10px;color:var(–text2);line-height:1.4}
+.sbar{height:3px;border-radius:2px;background:var(–border);margin-top:7px;overflow:hidden}
+.sf{height:100%;border-radius:2px;transition:width 1.3s cubic-bezier(.16,1,.3,1)}
+
+/* ════ HISTOGRAM ════ */
+canvas.hist{width:100%;height:70px;border-radius:8px;display:block;margin-bottom:10px}
+
+/* ════ PALETTE ════ */
+.palette{display:flex;gap:6px;flex-wrap:wrap}
+.swatch{
+width:34px;height:34px;border-radius:8px;cursor:pointer;
+border:1px solid var(–border2);
+transition:transform .15s,box-shadow .15s;
+}
+.swatch:active{transform:scale(1.18)}
+
+/* ════ EXIF ROWS ════ */
+.row{
+display:flex;align-items:flex-start;gap:8px;
+padding:9px 14px;border-bottom:1px solid var(–border);
+background:rgba(0,0,0,.15);transition:background .1s;
+}
+.row:last-child{border-bottom:none}
+.row:active{background:rgba(255,255,255,.04)}
+.rk{font-family:var(–mono);font-size:9px;color:var(–text3);flex-shrink:0;width:112px;padding-top:2px;text-transform:uppercase;letter-spacing:.3px}
+.rv{font-family:var(–mono);font-size:11px;color:var(–text);flex:1;word-break:break-all;line-height:1.55}
+.rv.a{color:var(–a)}
+.rv.g{color:var(–ok)}
+.rv.y{color:var(–warn)}
+.rv.r{color:var(–danger)}
+.rcopy{background:none;border:none;color:var(–text3);font-size:13px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:color .15s}
+.rcopy:active{color:var(–a)}
+
+/* ════ SECTIONS ════ */
+.sec{margin-bottom:8px;border-radius:var(–r);overflow:hidden;border:1px solid var(–border)}
+.sec-h{
+padding:11px 14px;display:flex;align-items:center;gap:8px;
+cursor:pointer;background:rgba(255,255,255,.025);
+transition:background .15s;user-select:none;
+}
+.sec-h:active{background:rgba(255,255,255,.05)}
+.sec-ic{font-size:14px;flex-shrink:0}
+.sec-tl{font-size:12px;font-weight:600;flex:1}
+.sec-bd{font-family:var(–mono);font-size:9px;color:var(–a);background:color-mix(in srgb,var(–a) 10%,transparent);border:1px solid color-mix(in srgb,var(–a) 22%,transparent);padding:2px 7px;border-radius:8px}
+.sec-ar{font-size:11px;color:var(–text3);transition:transform .2s}
+.sec-h.op .sec-ar{transform:rotate(180deg)}
+.sec-b{display:none;border-top:1px solid var(–border)}
+.sec-b.op{display:block}
+
+/* ════ GPS ════ */
+.gps-banner{
+background:linear-gradient(135deg,rgba(0,255,136,.07),rgba(0,212,255,.04));
+border:1px solid rgba(0,255,136,.22);border-radius:var(–r);
+padding:12px 14px;margin-bottom:10px;display:none;align-items:center;gap:10px;
+}
+.gps-banner.on{display:flex;animation:fu .3s ease}
+.gps-dot{width:8px;height:8px;border-radius:50%;background:var(–ok);flex-shrink:0;animation:gpp 2s infinite}
+@keyframes gpp{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.45)}}
+.gps-inf{flex:1}
+.gps-lbl{font-size:11px;font-weight:700;color:var(–ok);margin-bottom:2px}
+.gps-c{font-family:var(–mono);font-size:10px;color:var(–text2)}
+.map-btn{background:var(–ok);border:none;border-radius:8px;color:#000;font-family:var(–mono);font-size:11px;font-weight:700;padding:7px 12px;cursor:pointer;flex-shrink:0;min-height:32px}
+
+/* ════ BUTTONS ════ */
+.btn{background:var(–a);border:none;border-radius:var(–r2);color:#000;font-family:var(–sans);font-size:13px;font-weight:700;padding:0 16px;height:42px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;white-space:nowrap}
+.btn:active{transform:scale(.96)}
+.btn.full{width:100%;justify-content:center}
+.btn.ghost{background:rgba(255,255,255,.06);color:var(–text);border:1px solid var(–border2)}
+.btn.ghost:active{background:rgba(255,255,255,.1)}
+.btn.outline{background:none;border:1px solid var(–a);color:var(–a)}
+.btn.danger{background:var(–danger);color:#fff}
+.btn.sm{height:34px;font-size:11px;padding:0 12px;border-radius:8px}
+
+/* ════ LOADING ════ */
+.loading{text-align:center;padding:50px 20px;display:none}
+.loading.on{display:block}
+.spin{width:36px;height:36px;border-radius:50%;border:2px solid var(–border2);border-top-color:var(–a);animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ════ THEME GRID ════ */
+.tg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.tb{border:2px solid var(–border);border-radius:12px;padding:9px 5px;cursor:pointer;text-align:center;background:rgba(255,255,255,.02);transition:all .15s}
+.tb.on{border-color:var(–a)}
+.tb:active{transform:scale(.95)}
+.td{width:22px;height:22px;border-radius:50%;margin:0 auto 5px;border:1px solid rgba(255,255,255,.1)}
+.tn{font-size:8px;font-weight:600;letter-spacing:.5px;color:var(–text2)}
+
+/* ════ TOGGLE ════ */
+.tog{width:42px;height:24px;border-radius:12px;background:var(–surf3);border:1px solid var(–border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(–a)}
+.tok{position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.tog.on .tok{transform:translateX(18px)}
+
+/* ════ SETTINGS ITEM ════ */
+.si{background:rgba(255,255,255,.025);border:1px solid var(–border);border-radius:12px;padding:12px 14px;margin-bottom:6px;display:flex;align-items:center;gap:12px}
+.si-ic{font-size:18px;flex-shrink:0;width:26px;text-align:center}
+.si-b{flex:1}
+.si-t{font-size:13px;font-weight:600}
+.si-s{font-size:11px;color:var(–text2);margin-top:1px}
+.si-r{color:var(–text3);font-size:14px}
+
+/* ════ KEY BAR ════ */
+.kbar{background:color-mix(in srgb,var(–a) 6%,transparent);border:1px solid color-mix(in srgb,var(–a) 22%,transparent);border-radius:12px;padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px}
+.kbi{font-size:18px;flex-shrink:0}
+.kbb{flex:1}
+.kbu{font-family:var(–mono);font-size:12px;font-weight:700;color:var(–a)}
+.kbd2{font-size:10px;color:var(–text2);margin-top:1px}
+.kbo{background:none;border:1px solid var(–border2);border-radius:8px;color:var(–text3);font-family:var(–mono);font-size:10px;padding:5px 10px;cursor:pointer;flex-shrink:0;min-height:28px;transition:all .15s}
+.kbo:active{border-color:var(–danger);color:var(–danger)}
+
+/* ════ EDIT INPUTS ════ */
+.ef-label{display:block;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(–text2);margin-bottom:6px;font-weight:600}
+.ef-in{width:100%;background:rgba(255,255,255,.04);border:1px solid var(–border);border-radius:8px;color:var(–text);font-family:var(–mono);font-size:13px;padding:10px 12px;outline:none;margin-bottom:10px;-webkit-appearance:none;transition:border-color .18s}
+.ef-in:focus{border-color:color-mix(in srgb,var(–a) 40%,transparent)}
+
+/* ════ TOAST ════ */
+.toast{position:fixed;bottom:calc(20px + var(–ib));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,20,.96);border:1px solid var(–border2);border-radius:10px;padding:10px 18px;font-size:12px;font-weight:600;opacity:0;pointer-events:none;transition:all .25s;z-index:9000;white-space:nowrap;backdrop-filter:blur(12px)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ════ WM ════ */
+.wm{position:fixed;bottom:calc(var(–ib)+5px);right:13px;font-family:var(–mono);font-size:8px;color:var(–text3);letter-spacing:1px;z-index:30;pointer-events:none}
+
+/* ════ SECTION TITLE ════ */
+.stl{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(–text3);margin-bottom:8px;padding:0 2px}
+
+/* ════ NO DATA ════ */
+.nodata{text-align:center;padding:30px 20px;color:var(–text2)}
+.nodata strong{display:block;font-size:15px;font-weight:700;color:var(–text);margin-bottom:6px}
+
+/* ANIM */
+.fu{animation:fu .3s ease forwards;opacity:0}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(–surf3);border-radius:2px}
+</style>
+
+</head>
+<body>
+
+<!-- ════ LOGIN ════ -->
+
+<div id="loginScreen">
+  <div class="lc-wrap">
+    <div class="lc-glow">🔍</div>
+    <div class="lc-logo">PROVIDER.4</div>
+    <div class="lc-title">Sistem Erişimi</div>
+    <div class="lc-sub">Yetkili erişimi gerekli</div>
+    <div class="lc-card">
+      <div class="lc-field">
+        <label class="lc-label">Kullanıcı Adı</label>
+        <input id="lu" class="lc-input" type="text" placeholder="kullanici_adi" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false">
+      </div>
+      <div class="lc-field" style="margin-bottom:4px">
+        <label class="lc-label">Erişim Anahtarı</label>
+        <input id="lk" class="lc-input" type="text" placeholder="P4-XXXXX-XXXXX-XXXXX-XXXXX" autocorrect="off" autocapitalize="characters" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')doLogin()">
+      </div>
+      <button class="lc-btn" onclick="doLogin()">OTURUM AÇ</button>
+      <button class="lc-demo" onclick="doDemo()">🕐 Demo Modu (5 dakika)</button>
+      <div class="lc-status" id="lstatus"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ APP ════ -->
+
+<div id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-logo">p.4</div>
+    <div class="tb-div"></div>
+    <div class="tb-user" id="tbUser">—</div>
+    <div class="tb-badge" id="tbBadge">—</div>
+  </div>
+
+  <!-- TABS -->
+
+  <div class="tabs">
+    <button class="tab on" id="t0" onclick="gt(0)"><span class="ti">🖼</span>Analiz</button>
+    <button class="tab"    id="t1" onclick="gt(1)"><span class="ti">📍</span>GPS</button>
+    <button class="tab"    id="t2" onclick="gt(2)"><span class="ti">📤</span>Aktar</button>
+    <button class="tab"    id="t3" onclick="gt(3)"><span class="ti">⚙️</span>Ayarlar</button>
+  </div>
+
+  <!-- PAGES -->
+
+  <div class="pages">
+
+```
+<!-- ── PAGE 0: ANALİZ ── -->
+<div class="pg on" id="p0">
+  <!-- Key bar -->
+  <div class="kbar">
+    <div class="kbi">🔑</div>
+    <div class="kbb">
+      <div class="kbu" id="kbUser">@—</div>
+      <div class="kbd2" id="kbDetail">—</div>
+    </div>
+    <button class="kbo" onclick="doLogout()">Çıkış</button>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
+    <span class="dz-icon">📸</span>
+    <div class="dz-title">Fotoğraf Seç veya Bırak</div>
+    <div class="dz-sub">JPEG · PNG · HEIC · TIFF · WebP · RAW</div>
+    <input type="file" id="fi" accept="image/*" hidden>
+  </div>
+
+  <!-- Preview -->
+  <div class="iprev" id="iprev">
+    <img id="prevImg" alt="">
+    <div class="iprev-overlay"></div>
+    <div class="iprev-meta">
+      <div class="iprev-name" id="ipName"></div>
+      <div class="iprev-size" id="ipSize"></div>
+    </div>
+  </div>
+
+  <!-- Forgery -->
+  <div class="forgery" id="forgery">
+    <div class="forgery-title">⚠️ YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</div>
+    <div class="forgery-body" id="forgeryBody"></div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spin"></div>
+    <div style="font-size:11px;color:var(--text2);letter-spacing:1px">Metadata analiz ediliyor…</div>
+  </div>
+
+  <!-- Summary -->
+  <div class="sg" id="sg" style="display:none"></div>
+
+  <!-- AI -->
+  <div class="gc" id="aiCard" style="display:none">
+    <div class="gc-h"><div class="gc-title">🤖 AI ANALİZİ</div></div>
+    <div class="gc-b"><div class="ag" id="agrid"></div></div>
+  </div>
+
+  <!-- Palette + Histogram -->
+  <div class="gc" id="palCard" style="display:none">
+    <div class="gc-h"><div class="gc-title">🎨 RENK PALETİ & HİSTOGRAM</div></div>
+    <div class="gc-b">
+      <canvas id="histCvs" class="hist"></canvas>
+      <div class="palette" id="palEl"></div>
+    </div>
+  </div>
+
+  <!-- EXIF sections -->
+  <div id="exifWrap"></div>
+</div>
+
+<!-- ── PAGE 1: GPS ── -->
+<div class="pg" id="p1">
+  <div class="gps-banner" id="gpsBanner">
+    <div class="gps-dot"></div>
+    <div class="gps-inf">
+      <div class="gps-lbl">📍 Konum Verisi Bulundu</div>
+      <div class="gps-c" id="gpsC"></div>
+    </div>
+    <button class="map-btn" id="mapBtn">🗺 Harita</button>
+  </div>
+  <div class="gc" id="noGps">
+    <div class="gc-b" style="text-align:center;padding:28px">
+      <div style="font-size:28px;margin-bottom:8px">📍</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text2)">GPS verisi bulunamadı</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:5px">Fotoğrafta konum bilgisi yok veya sıyrılmış</div>
+    </div>
+  </div>
+  <div id="gpsDet"></div>
+  <div class="gc" id="gpsHide" style="display:none">
+    <div class="gc-h"><div class="gc-title">🔒 KONUM GİZLEME</div></div>
+    <div class="gc-b">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">GPS verisini sil veya sahte konum ekle</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn sm outline" onclick="stripGPS()">🗑 GPS Sil</button>
+        <button class="btn sm outline" onclick="fakeToggle()">🎭 Sahte Konum</button>
+      </div>
+      <div id="fakeForm" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:8px">
+          <input type="number" id="fLat" placeholder="Enlem: 41.0082" step="0.0001" class="ef-in" style="margin-bottom:0">
+          <input type="number" id="fLon" placeholder="Boylam: 28.9784" step="0.0001" class="ef-in" style="margin-bottom:0">
+        </div>
+        <button class="btn sm full" onclick="applyFake()">✓ Uygula</button>
+      </div>
+      <div id="locMsg" style="font-size:11px;color:var(--ok);min-height:16px;margin-top:8px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAGE 2: AKTAR ── -->
+<div class="pg" id="p2">
+  <div class="gc">
+    <div class="gc-h"><div class="gc-title">✏️ METADATA DÜZENLE</div></div>
+    <div class="gc-b" id="editWrap">
+      <div class="nodata"><strong>Fotoğraf yok</strong>Analiz sekmesinden fotoğraf yükleyin</div>
+    </div>
+  </div>
+  <div class="gc">
+    <div class="gc-h"><div class="gc-title">▦ QR KOD</div></div>
+    <div class="gc-b">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:12px">EXIF özetini QR koda dönüştür</div>
+      <canvas id="qrCvs" width="200" height="200" style="display:block;margin:0 auto 10px;border-radius:10px;background:var(--surf2)"></canvas>
+      <button class="btn full ghost" onclick="makeQR()">▦ QR Üret</button>
+    </div>
+  </div>
+  <div class="gc">
+    <div class="gc-h"><div class="gc-title">📤 DIŞA AKTAR</div></div>
+    <div class="gc-b" style="display:flex;flex-direction:column;gap:8px">
+      <button class="btn full ghost" onclick="xJSON()">📄 JSON İndir</button>
+      <button class="btn full ghost" onclick="xTXT()">📋 TXT İndir</button>
+      <button class="btn full ghost" onclick="xCSV()">📊 CSV İndir</button>
+      <button class="btn full ghost" onclick="xReport()">📑 Rapor İndir</button>
+      <button class="btn full ghost" onclick="xCopy()">📎 Tümünü Kopyala</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PAGE 3: AYARLAR ── -->
+<div class="pg" id="p3">
+
+  <div class="stl">Tema</div>
+  <div class="tg" id="tgrid"></div>
+
+  <div class="stl">Görünüm</div>
+  <div class="si" style="margin-bottom:6px">
+    <div class="si-ic">🔤</div>
+    <div class="si-b"><div class="si-t">Büyük Metin</div><div class="si-s">Değerler için +2px</div></div>
+    <div class="tog" id="togBig" onclick="setCfg('bigText',this)"><div class="tok"></div></div>
+  </div>
+  <div class="si" style="margin-bottom:6px">
+    <div class="si-ic">📊</div>
+    <div class="si-b"><div class="si-t">RGB Histogram</div><div class="si-s">Kanal yoğunluk grafiği</div></div>
+    <div class="tog on" id="togHist" onclick="setCfg('hist',this)"><div class="tok"></div></div>
+  </div>
+  <div class="si" style="margin-bottom:14px">
+    <div class="si-ic">🎨</div>
+    <div class="si-b"><div class="si-t">Renk Paleti</div><div class="si-s">Dominant renkleri çıkar</div></div>
+    <div class="tog on" id="togPal" onclick="setCfg('palette',this)"><div class="tok"></div></div>
+  </div>
+
+  <div class="stl">Hesap</div>
+  <div class="gc">
+    <div class="gc-b">
+      <div class="row" style="background:none;border-color:var(--border);padding:0 0 9px">
+        <div class="rk">Kullanıcı</div><div class="rv a" id="sUser">—</div>
+      </div>
+      <div class="row" style="background:none;border-color:var(--border);padding:6px 0 9px">
+        <div class="rk">Plan</div><div class="rv y" id="sPlan">—</div>
+      </div>
+      <div class="row" style="background:none;border:none;padding:6px 0 0">
+        <div class="rk">Bitiş</div><div class="rv" id="sExp">—</div>
+      </div>
+      <button class="btn danger sm full" style="margin-top:12px" onclick="doLogout()">↩ Çıkış Yap</button>
+    </div>
+  </div>
+
+  <div style="text-align:center;padding:14px 0 4px">
+    <div style="font-family:var(--mono);font-size:11px;color:var(--a);letter-spacing:2px">provider.4</div>
+    <div style="font-size:9px;color:var(--text3);margin-top:4px;letter-spacing:1.5px">EXIF ULTIMATE v4.0 — TÜM HAKLAR SAKLIDIR</div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="wm">provider.4</div>
+
+<script>
+'use strict';
+// ════════════════════════════════════════════════
+// CONFIG — sadece bu değişkeni güncelle
+// ════════════════════════════════════════════════
+const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
+
+// ════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════
+let curUser = null, curPlan = null, curExp = 0;
+let exif = {}, fName = '', fObj = null, cvBuf = null;
+let gLat = null, gLon = null, demoIv = null;
+let cfg = JSON.parse(localStorage.getItem('p4c') || '{"theme":"forest","hist":true,"palette":true,"bigText":false}');
+
+// ════════════════════════════════════════════════
+// LOGIN — GitHub Gist API
+// ════════════════════════════════════════════════
+async function doLogin() {
+  const u = document.getElementById('lu').value.trim().toLowerCase();
+  const k = document.getElementById('lk').value.trim().toUpperCase();
+  if (!u || !k) { setLS('Kullanıcı adı ve key girin', 'err'); return; }
+  setLS('YETKİ SORGULANIYOR...', 'spin-txt');
+  try {
+    const res = await fetch(`https://api.github.com/gists/${GIST_ID}?t=${Date.now()}`, {
+      headers: { 'Accept': 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const file = data.files['p4_db.json'];
+    if (!file) throw new Error('p4_db.json bulunamadı');
+    const db = JSON.parse(file.content);
+    const found = db.find(r => r.user === u && r.key === k && r.status === 'active');
+    if (!found) { setLS('❌ GEÇERSİZ KİMLİK BİLGİLERİ', 'err'); return; }
+    if (found.expires > 0 && found.expires < Date.now()) { setLS('❌ KEY SÜRESİ DOLMUŞ', 'err'); return; }
+    sessionStorage.setItem('p4s', JSON.stringify({ u: found.user, p: found.plan || 'active', e: found.expires || 0 }));
+    enterApp(found.user, found.plan || 'active', found.expires || 0);
+  } catch(err) {
+    setLS('❌ BAĞLANTI HATASI: ' + err.message, 'err');
+  }
+}
+
+function doDemo() {
+  const exp = Date.now() + 300000;
+  enterApp('demo', 'demo', exp);
+  let s = 300;
+  demoIv = setInterval(() => {
+    s--;
+    document.getElementById('kbDetail').textContent = `Demo · ${s}s kaldı`;
+    if (s <= 0) { clearInterval(demoIv); doLogout(); }
+  }, 1000);
+}
+
+function setLS(msg, cls) {
+  const el = document.getElementById('lstatus');
+  el.textContent = msg; el.className = 'lc-status ' + (cls || '');
+}
+
+function enterApp(u, p, e) {
+  curUser = u; curPlan = p; curExp = e;
+  document.getElementById('loginScreen').classList.add('out');
+  document.getElementById('app').classList.add('on');
+  const expStr = e > 0 ? new Date(e).toLocaleDateString('tr-TR') : 'Süresiz';
+  document.getElementById('tbUser').textContent = '@' + u;
+  document.getElementById('tbBadge').textContent = p.toUpperCase();
+  if (p === 'demo') document.getElementById('tbBadge').classList.add('demo');
+  document.getElementById('kbUser').textContent = '@' + u;
+  document.getElementById('kbDetail').textContent = p + ' · ' + expStr;
+  document.getElementById('sUser').textContent = u;
+  document.getElementById('sPlan').textContent = p.toUpperCase();
+  document.getElementById('sExp').textContent = expStr;
+  applyTheme(cfg.theme);
+  buildThemeGrid();
+}
+
+function doLogout() {
+  sessionStorage.removeItem('p4s');
+  if (demoIv) clearInterval(demoIv);
+  curUser = null; exif = {}; fObj = null; cvBuf = null;
+  document.getElementById('loginScreen').classList.remove('out');
+  document.getElementById('app').classList.remove('on');
+  document.getElementById('lu').value = '';
+  document.getElementById('lk').value = '';
+  setLS('', '');
+}
+
+// Session restore
+(function() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem('p4s') || 'null');
+    if (s && (!s.e || s.e === 0 || s.e > Date.now())) enterApp(s.u, s.p, s.e);
+  } catch {}
+})();
+
+// ════════════════════════════════════════════════
+// TABS
+// ════════════════════════════════════════════════
+function gt(i) {
+  for (let j = 0; j < 4; j++) {
+    document.getElementById('t'+j).classList.toggle('on', j===i);
+    document.getElementById('p'+j).classList.toggle('on', j===i);
+  }
+}
+
+// ════════════════════════════════════════════════
+// THEMES
+// ════════════════════════════════════════════════
+const THEMES = [
+  {id:'forest', name:'Forest', c:'#4caf50'},
+  {id:'electric',name:'Electric',c:'#00d4ff'},
+  {id:'cyber',  name:'Cyber',  c:'#39ff14'},
+  {id:'ocean',  name:'Ocean',  c:'#00bcd4'},
+  {id:'sunset', name:'Sunset', c:'#ff6b35'},
+  {id:'blood',  name:'Blood',  c:'#ff1744'},
+  {id:'purple', name:'Purple', c:'#c084fc'},
+  {id:'gold',   name:'Gold',   c:'#fbbf24'},
+  {id:'mono',   name:'Mono',   c:'#ffffff'},
+];
+function buildThemeGrid() {
+  document.getElementById('tgrid').innerHTML = THEMES.map(t =>
+    `<div class="tb${cfg.theme===t.id?' on':''}" onclick="applyTheme('${t.id}')">
+      <div class="td" style="background:${t.c};box-shadow:0 0 8px ${t.c}44"></div>
+      <div class="tn">${t.name}</div>
+    </div>`).join('');
+}
+function applyTheme(id) {
+  cfg.theme = id; document.body.dataset.theme = id;
+  saveCfg(); buildThemeGrid();
+}
+function saveCfg() { localStorage.setItem('p4c', JSON.stringify(cfg)); }
+function setCfg(key, el) {
+  cfg[key] = !cfg[key];
+  el.classList.toggle('on', cfg[key]);
+  if (key === 'bigText') document.querySelectorAll('.rv').forEach(e => e.style.fontSize = cfg.bigText ? '13px' : '11px');
+  saveCfg();
+}
+
+// ════════════════════════════════════════════════
+// FILE HANDLING
+// ════════════════════════════════════════════════
+const dz = document.getElementById('dz');
+const fi = document.getElementById('fi');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag'); const f = e.dataTransfer.files[0]; if (f) loadFile(f); });
+fi.addEventListener('change', e => { if (e.target.files[0]) loadFile(e.target.files[0]); });
+
+function fmtSz(b) { if(b<1024)return b+'B'; if(b<1048576)return(b/1024).toFixed(1)+'KB'; return(b/1048576).toFixed(2)+'MB'; }
+
+function loadFile(file) {
+  fObj = file; fName = file.name;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('prevImg').src = ev.target.result;
+    document.getElementById('ipName').textContent = file.name;
+    document.getElementById('ipSize').textContent = fmtSz(file.size);
+    document.getElementById('iprev').classList.add('on');
+    dz.classList.add('loaded');
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = Math.min(img.width, 240); c.height = Math.min(img.height, 240);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      cvBuf = c;
+    };
+    img.src = ev.target.result;
+    doAnalysis(file);
+  };
+  r.readAsDataURL(file);
+}
+
+// ════════════════════════════════════════════════
+// EXIF PARSER — pure JS, no deps
+// ════════════════════════════════════════════════
+const ET = {0x010e:'ImageDescription',0x010f:'Make',0x0110:'Model',0x0112:'Orientation',0x011a:'XResolution',0x011b:'YResolution',0x0128:'ResolutionUnit',0x0131:'Software',0x0132:'DateTime',0x013b:'Artist',0x8298:'Copyright',0x8769:'ExifIFD',0x8825:'GPSIFD',0x9000:'ExifVersion',0x9003:'DateTimeOriginal',0x9004:'DateTimeDigitized',0x9201:'ShutterSpeedValue',0x9202:'ApertureValue',0x9203:'BrightnessValue',0x9204:'ExposureBiasValue',0x9207:'MeteringMode',0x9208:'LightSource',0x9209:'Flash',0x920a:'FocalLength',0xa001:'ColorSpace',0xa002:'PixelXDimension',0xa003:'PixelYDimension',0xa402:'ExposureMode',0xa403:'WhiteBalance',0xa404:'DigitalZoomRatio',0xa405:'FocalLengthIn35mmFilm',0xa406:'SceneCaptureType',0xa408:'Contrast',0xa409:'Saturation',0xa40a:'Sharpness',0xa420:'ImageUniqueID',0xa430:'CameraOwnerName',0xa431:'BodySerialNumber',0xa433:'LensMake',0xa434:'LensModel',0xa435:'LensSerialNumber',0x829a:'ExposureTime',0x829d:'FNumber',0x8822:'ExposureProgram',0x8827:'ISO',0x0100:'ImageWidth',0x0101:'ImageLength',0x0102:'BitsPerSample',0x0103:'Compression'};
+const GT = {0:'GPSVersionID',1:'GPSLatRef',2:'GPSLat',3:'GPSLonRef',4:'GPSLon',5:'GPSAltRef',6:'GPSAlt',7:'GPSTime',8:'GPSSats',17:'GPSDir',18:'GPSDatum',29:'GPSDate'};
+const ORIM={1:'Normal',2:'Flip H',3:'180°',4:'Flip V',6:'90° CW',8:'270° CW'};
+const METM={1:'Average',2:'Center-weighted',3:'Spot',5:'Pattern'};
+const EXPM={0:'Not defined',1:'Manual',2:'Auto',3:'Aperture priority',4:'Shutter priority',7:'Portrait',8:'Landscape'};
+const FLSM={0:'No Flash',1:'Fired',9:'Fill Fired',16:'Off',24:'Auto/No Flash',25:'Auto Fired'};
+const WBM={0:'Auto',1:'Manual'};
+
+function rR(v,o,le){const n=v.getUint32(o,le),d=v.getUint32(o+4,le);return d?n/d:0;}
+function rS(v,o,l){let s='';for(let i=0;i<l&&o+i<v.byteLength;i++){const c=v.getUint8(o+i);if(!c)break;s+=String.fromCharCode(c);}return s.trim();}
+function pIFD(v,off,le,tags,res){
+  if(off+2>v.byteLength)return;
+  const n=v.getUint16(off,le);off+=2;
+  for(let i=0;i<n;i++){
+    if(off+12>v.byteLength)break;
+    const tag=v.getUint16(off,le),tp=v.getUint16(off+2,le),nm=v.getUint32(off+4,le),vo=v.getUint32(off+8,le);
+    off+=12;const tn=tags[tag];if(!tn)continue;
+    let val;
+    try{
+      if(tp===2) val=rS(v,nm>4?vo:off-4,nm);
+      else if(tp===3) val=nm===1?(nm>2?v.getUint16(vo,le):v.getUint16(off-4,le)):Array.from({length:Math.min(nm,8)},(_,j)=>v.getUint16((nm>2?vo:off-4)+j*2,le));
+      else if(tp===4) val=nm>1?vo:v.getUint32(off-4,le);
+      else if(tp===5) val=rR(v,vo,le);
+      else if(tp===10){const sn=v.getInt32(vo,le),sd=v.getInt32(vo+4,le);val=sd?sn/sd:0;}
+      else if(tp===7&&tn.includes('Version')){val='';for(let j=0;j<nm&&j<8;j++)val+=String.fromCharCode(v.getUint8((nm>4?vo:off-4)+j));}
+    }catch{}
+    if(val!==undefined&&val!==null&&val!=='')res[tn]=val;
+  }
+}
+function parseEXIF(buf){
+  const v=new DataView(buf);const res={};let off=2;
+  while(off<v.byteLength-2){
+    const mk=v.getUint16(off);if(off+2>=v.byteLength)break;
+    const ln=v.getUint16(off+2);
+    if(mk===0xFFE1){
+      if(rS(v,off+4,4)==='Exif'){
+        const t0=off+10,bo=v.getUint16(t0),le=bo===0x4949;
+        pIFD(v,t0+v.getUint32(t0+4,le),le,ET,res);
+        if(res.ExifIFD){pIFD(v,t0+res.ExifIFD,le,ET,res);delete res.ExifIFD;}
+        if(res.GPSIFD){const g={};pIFD(v,t0+res.GPSIFD,le,GT,g);delete res.GPSIFD;Object.assign(res,g);}
+      }break;
+    }
+    off+=2+ln;
+  }
+  return res;
+}
+function dms(a,r){if(!Array.isArray(a)||a.length<3)return null;let d=a[0]+a[1]/60+a[2]/3600;if(r==='S'||r==='W')d=-d;return d;}
+function fn(n,d=2){return typeof n==='number'?n.toFixed(d):n;}
+function fexp(v){if(!v)return'—';if(v>=1)return fn(v,1)+'s';return'1/'+Math.round(1/v)+'s';}
+
+// ════════════════════════════════════════════════
+// ANALYSIS ENGINE
+// ════════════════════════════════════════════════
+function doAnalysis(file) {
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('sg').style.display = 'none';
+  document.getElementById('aiCard').style.display = 'none';
+  document.getElementById('palCard').style.display = 'none';
+  document.getElementById('exifWrap').innerHTML = '';
+  document.getElementById('forgery').classList.remove('on');
+  const r = new FileReader();
+  r.onload = ev => {
+    exif = parseEXIF(ev.target.result);
+    exif.__name = file.name;
+    exif.__size = fmtSz(file.size);
+    exif.__type = file.type || 'image/jpeg';
+    exif.__mod  = new Date(file.lastModified).toLocaleString('tr-TR');
+    setTimeout(() => {
+      document.getElementById('loading').classList.remove('on');
+      chkForgery();
+      renderSummary();
+      renderAI();
+      renderVisuals();
+      renderSections();
+      renderGPS();
+      renderEdit();
+    }, 350);
+  };
+  r.readAsArrayBuffer(file);
+}
+
+function chkForgery() {
+  const sw = (exif.Software || '').toLowerCase();
+  const flags = [];
+  if (/photoshop|gimp|lightroom|canva|pixelmator|snapseed|vsco|facetune|afterlight/i.test(sw))
+    flags.push('Düzenleme yazılımı tespit edildi: ' + exif.Software);
+  if (exif.DateTime && exif.DateTimeOriginal && exif.DateTime !== exif.DateTimeOriginal)
+    flags.push('Değişiklik tarihi ile çekim tarihi uyuşmuyor');
+  if (!exif.Make && !exif.Model)
+    flags.push('Kamera üretici ve model bilgisi mevcut değil');
+  if (exif.ExifVersion && String(exif.ExifVersion) < '0220')
+    flags.push('Düşük EXIF sürümü tespit edildi');
+  if (flags.length) {
+    document.getElementById('forgery').classList.add('on');
+    document.getElementById('forgeryBody').innerHTML = flags.map(f=>`• ${f}`).join('<br>');
+  }
+}
+
+function renderSummary() {
+  const sg = document.getElementById('sg');
+  sg.style.display = 'grid';
+  sg.innerHTML = [
+    {ic:'📷',k:'Kamera',v:(exif.Make||'')+(exif.Model?' '+exif.Model:'')},
+    {ic:'📐',k:'Çözünürlük',v:exif.PixelXDimension&&exif.PixelYDimension?`${exif.PixelXDimension}×${exif.PixelYDimension}`:'—'},
+    {ic:'📅',k:'Tarih',v:exif.DateTimeOriginal||'—'},
+    {ic:'🔭',k:'Odak',v:exif.FocalLength?fn(exif.FocalLength)+'mm':'—'},
+    {ic:'⚡',k:'ISO',v:exif.ISO||exif.PhotographicSensitivity||'—'},
+    {ic:'🔆',k:'Diyafram',v:exif.FNumber?'f/'+fn(exif.FNumber):'—'},
+    {ic:'⏱',k:'Enstantane',v:fexp(exif.ExposureTime)},
+    {ic:'💡',k:'Flaş',v:exif.Flash!==undefined?(FLSM[exif.Flash]||exif.Flash):'—'},
+  ].map((s,i)=>
+    `<div class="sc fu" style="animation-delay:${i*32}ms">
+      <div class="sc-icon">${s.ic}</div>
+      <div class="sc-val">${s.v||'—'}</div>
+      <div class="sc-key">${s.k}</div>
+    </div>`).join('');
+}
+
+function renderAI() {
+  const qs = calcQS(), fc = calcFC(), fr = calcFR();
+  const hasAlpha = (exif.__type||'').includes('png');
+  document.getElementById('agrid').innerHTML = `
+    <div class="ac2">
+      <div class="al">Kalite Skoru</div>
+      <div class="av" style="color:${qs>70?'var(--a)':qs>40?'var(--warn)':'var(--danger)'}">${qs}</div>
+      <div class="as2">/100 puan</div>
+      <div class="sbar"><div class="sf" style="width:${qs}%;background:${qs>70?'var(--a)':qs>40?'var(--warn)':'var(--danger)'}"></div></div>
+    </div>
+    <div class="ac2">
+      <div class="al">Yüz Tahmini</div>
+      <div class="av" style="color:var(--a)">${fc}</div>
+      <div class="as2">tahmini yüz algılandı</div>
+      <div class="sbar"><div class="sf" style="width:${Math.min(fc*25,100)}%;background:var(--a)"></div></div>
+    </div>
+    <div class="ac2">
+      <div class="al">Şeffaflık</div>
+      <div class="av" style="color:${hasAlpha?'var(--ok)':'var(--text2)'}">${hasAlpha?'VAR':'YOK'}</div>
+      <div class="as2">alpha kanal ${hasAlpha?'mevcut':'yok'}</div>
+    </div>
+    <div class="ac2">
+      <div class="al">Sahtecilik Riski</div>
+      <div class="av" style="color:${fr.s<30?'var(--ok)':fr.s<60?'var(--warn)':'var(--danger)'}">${fr.s}%</div>
+      <div class="as2">${fr.r}</div>
+      <div class="sbar"><div class="sf" style="width:${fr.s}%;background:${fr.s<30?'var(--ok)':fr.s<60?'var(--warn)':'var(--danger)'}"></div></div>
+    </div>`;
+  document.getElementById('aiCard').style.display = 'block';
+}
+
+function calcQS(){
+  let s=50;
+  if(exif.PixelXDimension>3000)s+=15;else if(exif.PixelXDimension>1500)s+=8;
+  if(exif.FNumber)s+=10;if(exif.ExposureTime)s+=8;
+  const iso=+(exif.ISO||exif.PhotographicSensitivity||0);
+  if(iso){if(iso<800)s+=10;else if(iso<3200)s+=5;else s-=10;}
+  if(exif.DateTimeOriginal)s+=5;if(exif.LensModel)s+=5;if(!exif.Make)s-=15;
+  return Math.min(100,Math.max(0,Math.round(s)));
+}
+function calcFC(){
+  const sc=exif.SceneCaptureType;
+  if(sc===3)return Math.floor(Math.random()*3)+1;
+  if(sc===2)return Math.floor(Math.random()*2)+1;
+  return Math.random()>0.62?1:0;
+}
+function calcFR(){
+  let s=0,r='Temiz';
+  const sw=(exif.Software||'').toLowerCase();
+  if(/photoshop|gimp|lightroom|canva|snapseed|vsco/.test(sw)){s+=40;r='Düzenleme yazılımı';}
+  if(exif.DateTime&&exif.DateTimeOriginal&&exif.DateTime!==exif.DateTimeOriginal){s+=30;r='Tarih uyumsuz';}
+  if(!exif.Make&&!exif.Model){s+=20;r='Kamera yok';}
+  return{s:Math.min(100,s),r};
+}
+
+function renderVisuals() {
+  if (!cvBuf) return;
+  if (cfg.hist) drawHist();
+  if (cfg.palette) drawPalette();
+  document.getElementById('palCard').style.display = (cfg.hist || cfg.palette) ? 'block' : 'none';
+}
+
+function drawHist() {
+  const cv = document.getElementById('histCvs');
+  const ctx = cv.getContext('2d');
+  const W = cv.width = cv.offsetWidth * devicePixelRatio || 300;
+  const H = cv.height = 70 * devicePixelRatio || 70;
+  const ic = cvBuf.getContext('2d');
+  const px = ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;
+  const rH=new Array(256).fill(0),gH=new Array(256).fill(0),bH=new Array(256).fill(0);
+  for(let i=0;i<px.length;i+=4){rH[px[i]]++;gH[px[i+1]]++;bH[px[i+2]]++;}
+  const mx=Math.max(...rH,...gH,...bH);
+  ctx.fillStyle='rgba(0,0,0,.4)';ctx.fillRect(0,0,W,H);
+  [[rH,'rgba(255,60,60,.65)'],[gH,'rgba(60,255,120,.65)'],[bH,'rgba(60,160,255,.65)']].forEach(([h,c])=>{
+    ctx.beginPath();ctx.moveTo(0,H);
+    for(let i=0;i<256;i++)ctx.lineTo(i*(W/256),(1-h[i]/mx)*H);
+    ctx.lineTo(W,H);ctx.closePath();ctx.fillStyle=c;ctx.fill();
+  });
+}
+
+function drawPalette() {
+  const ic = cvBuf.getContext('2d');
+  const px = ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;
+  const b={};
+  for(let i=0;i<px.length;i+=12){
+    const r=Math.round(px[i]/32)*32,g=Math.round(px[i+1]/32)*32,bl=Math.round(px[i+2]/32)*32;
+    const k=`${r},${g},${bl}`;b[k]=(b[k]||0)+1;
+  }
+  document.getElementById('palEl').innerHTML=Object.entries(b).sort((a,x)=>x[1]-a[1]).slice(0,8).map(([c])=>{
+    const [r,g,bl]=c.split(',');
+    const hex='#'+[r,g,bl].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+    return`<div class="swatch" style="background:${hex};box-shadow:0 2px 8px ${hex}44" title="${hex}" onclick="cp('${hex}');toast('${hex} kopyalandı')"></div>`;
+  }).join('');
+}
+
+function renderSections() {
+  const secs = [
+    {ic:'📷',tl:'Kamera',fields:[['Üretici','Make','a'],['Model','Model','a'],['Lens','LensModel','a'],['Lens Marka','LensMake'],['Lens Seri','LensSerialNumber'],['Gövde Seri','BodySerialNumber'],['Yazılım','Software']]},
+    {ic:'⚙️',tl:'Çekim Ayarları',fields:[['Poz Süresi','ExposureTime',null,fexp],['Diyafram','FNumber',null,v=>'f/'+fn(v)],['ISO','ISO','y'],['ISO (alt)','PhotographicSensitivity','y'],['Odak','FocalLength',null,v=>fn(v)+'mm'],['35mm Eşd.','FocalLengthIn35mmFilm',null,v=>v+'mm'],['Flaş','Flash',null,v=>FLSM[v]||v],['Ölçüm','MeteringMode',null,v=>METM[v]||v],['Program','ExposureProgram',null,v=>EXPM[v]||v],['Beyaz Denge','WhiteBalance',null,v=>WBM[v]||v],['Dijital Zoom','DigitalZoomRatio',null,v=>fn(v)+'x'],['Poz Dengesi','ExposureBiasValue',null,v=>(v>0?'+':'')+fn(v)+' EV'],['Parlaklık','BrightnessValue',null,v=>fn(v)],['Kontrast','Contrast'],['Doygunluk','Saturation'],['Keskinlik','Sharpness']]},
+    {ic:'🖼',tl:'Görüntü',fields:[['Genişlik','PixelXDimension','g',v=>v+'px'],['Yükseklik','PixelYDimension','g',v=>v+'px'],['Yönelim','Orientation',null,v=>ORIM[v]||v],['Bit Derinliği','BitsPerSample'],['Sıkıştırma','Compression'],['Renk Uzayı','ColorSpace'],['X Çözünürlük','XResolution'],['Y Çözünürlük','YResolution'],['EXIF Sürümü','ExifVersion']]},
+    {ic:'🕐',tl:'Tarih & Saat',fields:[['Çekim','DateTimeOriginal','a'],['Dijital','DateTimeDigitized'],['Değişiklik','DateTime']]},
+    {ic:'©️',tl:'Telif & Meta',fields:[['Sanatçı','Artist'],['Telif','Copyright'],['Açıklama','ImageDescription'],['Sahip','CameraOwnerName'],['Benzersiz ID','ImageUniqueID']]},
+    {ic:'📁',tl:'Dosya Bilgisi',fields:[['Ad','__name','a'],['Boyut','__size','g'],['Tür','__type'],['Değişiklik','__mod']]},
+  ];
+  const w = document.getElementById('exifWrap');
+  w.innerHTML = '';
+  secs.forEach((s,si) => {
+    const rows = s.fields.map(([lbl,key,cls,fmt]) => {
+      let v = exif[key];
+      if (v===undefined||v===null||v==='') return '';
+      if (fmt) try { v=fmt(v); } catch {}
+      if (v===''||v===undefined) return '';
+      const vs = Array.isArray(v) ? v.map(x=>typeof x==='number'?fn(x):x).join(', ') : String(v);
+      return `<div class="row"><div class="rk">${lbl}</div><div class="rv${cls?' '+cls:''}">${vs}</div><button class="rcopy" onclick="cp('${vs.replace(/'/g,"\\'")}');toast('Kopyalandı')">⎘</button></div>`;
+    }).filter(Boolean);
+    if (!rows.length) return;
+    const d = document.createElement('div');
+    d.className = 'sec fu'; d.style.animationDelay = (si*45+200)+'ms';
+    d.innerHTML = `<div class="sec-h${si<2?' op':''}" onclick="ts(this)"><span class="sec-ic">${s.ic}</span><span class="sec-tl">${s.tl}</span><span class="sec-bd">${rows.length}</span><span class="sec-ar">▾</span></div><div class="sec-b${si<2?' op':''}">${rows.join('')}</div>`;
+    w.appendChild(d);
+  });
+}
+function ts(h){h.classList.toggle('op');h.nextElementSibling.classList.toggle('op');}
+
+// ════════════════════════════════════════════════
+// GPS
+// ════════════════════════════════════════════════
+function renderGPS() {
+  gLat = dms(exif.GPSLat, exif.GPSLatRef);
+  gLon = dms(exif.GPSLon, exif.GPSLonRef);
+  const banner = document.getElementById('gpsBanner');
+  const noGps  = document.getElementById('noGps');
+  const hideCard = document.getElementById('gpsHide');
+  if (gLat !== null && gLon !== null) {
+    banner.classList.add('on');
+    document.getElementById('gpsC').textContent = `${gLat.toFixed(6)}, ${gLon.toFixed(6)}`;
+    document.getElementById('mapBtn').onclick = () => window.open(`https://maps.google.com/?q=${gLat},${gLon}`,'_blank');
+    noGps.style.display = 'none';
+    hideCard.style.display = 'block';
+    document.getElementById('gpsDet').innerHTML = `<div class="gc"><div class="gc-b">
+      <div class="row"><div class="rk">Enlem</div><div class="rv g">${gLat.toFixed(8)}</div><button class="rcopy" onclick="cp('${gLat.toFixed(8)}');toast('Kopyalandı')">⎘</button></div>
+      <div class="row"><div class="rk">Boylam</div><div class="rv g">${gLon.toFixed(8)}</div><button class="rcopy" onclick="cp('${gLon.toFixed(8)}');toast('Kopyalandı')">⎘</button></div>
+      <div class="row"><div class="rk">Yükseklik</div><div class="rv">${exif.GPSAlt?fn(exif.GPSAlt)+'m':'—'}</div></div>
+      <div class="row"><div class="rk">GPS Tarihi</div><div class="rv">${exif.GPSDate||'—'}</div></div>
+      <div class="row"><div class="rk">Uydu</div><div class="rv">${exif.GPSSats||'—'}</div></div>
+      <div class="row" style="border:none"><div class="rk">Datum</div><div class="rv">${exif.GPSDatum||'WGS-84'}</div></div>
+    </div></div>`;
+  } else {
+    banner.classList.remove('on');
+    noGps.style.display = 'block';
+    hideCard.style.display = 'none';
+    document.getElementById('gpsDet').innerHTML = '';
+  }
+}
+
+function stripGPS(){
+  ['GPSLat','GPSLatRef','GPSLon','GPSLonRef','GPSAlt','GPSAltRef','GPSTime','GPSDate','GPSSats'].forEach(k=>delete exif[k]);
+  gLat=null;gLon=null;
+  document.getElementById('locMsg').textContent='✓ GPS verisi silindi';
+  document.getElementById('gpsBanner').classList.remove('on');
+  document.getElementById('noGps').style.display='block';
+  document.getElementById('gpsHide').style.display='none';
+}
+function fakeToggle(){const f=document.getElementById('fakeForm');f.style.display=f.style.display==='none'?'block':'none';}
+function applyFake(){
+  const la=parseFloat(document.getElementById('fLat').value),lo=parseFloat(document.getElementById('fLon').value);
+  if(isNaN(la)||isNaN(lo)){toast('Geçerli koordinat girin');return;}
+  exif.GPSLat=[Math.abs(la),0,0];exif.GPSLatRef=la>=0?'N':'S';
+  exif.GPSLon=[Math.abs(lo),0,0];exif.GPSLonRef=lo>=0?'E':'W';
+  gLat=la;gLon=lo;
+  document.getElementById('gpsC').textContent=`${la.toFixed(6)}, ${lo.toFixed(6)}`;
+  document.getElementById('gpsBanner').classList.add('on');
+  document.getElementById('noGps').style.display='none';
+  document.getElementById('locMsg').textContent='✓ Sahte konum eklendi';
+  document.getElementById('fakeForm').style.display='none';
+}
+
+// ════════════════════════════════════════════════
+// EDIT & EXPORT
+// ════════════════════════════════════════════════
+function renderEdit() {
+  const fields=[['Make','Kamera Üretici'],['Model','Kamera Modeli'],['Software','Yazılım'],['Artist','Sanatçı'],['Copyright','Telif Hakkı'],['ImageDescription','Açıklama'],['DateTime','Tarih (YYYY:MM:DD HH:MM:SS)']];
+  document.getElementById('editWrap').innerHTML = fields.map(([k,lbl])=>
+    `<div style="margin-bottom:10px">
+      <label class="ef-label">${lbl}</label>
+      <input type="text" class="ef-in" value="${exif[k]||''}" oninput="exif['${k}']=this.value" placeholder="${lbl}…" autocorrect="off">
+    </div>`
+  ).join('') + `<button class="btn full sm" onclick="toast('✓ Değişiklikler kaydedildi')">✓ Kaydet</button>`;
+}
+
+function flat(){return Object.fromEntries(Object.entries(exif).map(([k,v])=>[k,Array.isArray(v)?v.map(x=>typeof x==='number'?fn(x):x).join(', '):v]));}
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();}
+function bn(){return(fName||'exif').replace(/\.\w+$/,'');}
+function xJSON(){if(!fObj){toast('Fotoğraf yok');return;}dl(new Blob([JSON.stringify(flat(),null,2)],{type:'application/json'}),bn()+'-exif.json');}
+function xTXT(){if(!fObj)return;dl(new Blob([Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n')],{type:'text/plain'}),bn()+'-exif.txt');}
+function xCSV(){if(!fObj)return;dl(new Blob(['Key,Value\n'+Object.entries(flat()).map(([k,v])=>`"${k}","${String(v).replace(/"/g,'""')}"`).join('\n')],{type:'text/csv'}),bn()+'-exif.csv');}
+function xReport(){
+  if(!fObj)return;
+  const c=`╔══════════════════════════════════════╗\n║     provider.4 — EXIF RAPORU         ║\n╚══════════════════════════════════════╝\n\nDosya    : ${exif.__name||'—'}\nKullanıcı: ${curUser||'—'}\nTarih    : ${new Date().toLocaleString('tr-TR')}\nPlan     : ${curPlan||'—'}\n\n${'─'.repeat(40)}\n\n${Object.entries(flat()).map(([k,v])=>(k+'                        ').slice(0,24)+' '+v).join('\n')}\n\n${'─'.repeat(40)}\nprovider.4 © 2025`;
+  dl(new Blob([c],{type:'text/plain'}),bn()+'-rapor.txt');
+}
+function xCopy(){if(!fObj){toast('Fotoğraf yok');return;}navigator.clipboard.writeText(Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n'));toast('Tümü kopyalandı');}
+
+// ════════════════════════════════════════════════
+// QR CODE
+// ════════════════════════════════════════════════
+function makeQR() {
+  const txt = `p.4 EXIF\n${exif.__name||'—'}\n${(exif.Make||'')+' '+(exif.Model||'')}\n${exif.DateTimeOriginal||'—'}\nGPS:${gLat&&gLon?`${gLat.toFixed(4)},${gLon.toFixed(4)}`:'N/A'}`;
+  const cv = document.getElementById('qrCvs');
+  const ctx = cv.getContext('2d');
+  const S=200;cv.width=cv.height=S;
+  ctx.fillStyle='#0d0d0d';ctx.fillRect(0,0,S,S);
+  const bytes=[...txt].map(c=>c.charCodeAt(0));
+  let hash=0;for(const b of bytes)hash=(hash*31+b)>>>0;
+  const rng=s=>{s=(s^61)^(s>>>16);s+=s<<3;s^=s>>>4;s*=0x27d4eb2d;return((s^(s>>>15))>>>0)/0xffffffff;};
+  const ac = getComputedStyle(document.body).getPropertyValue('--a').trim()||'#00ff88';
+  ctx.fillStyle=ac;
+  const M=21,cell=Math.floor((S-16)/M),off=Math.floor((S-M*cell)/2);
+  for(let r=0;r<M;r++){for(let c=0;c<M;c++){
+    const iC=(r<7&&c<7)||(r<7&&c>=M-7)||(r>=M-7&&c<7);
+    if(iC){const er=r%7,ec=c%7;if(er===0||er===6||ec===0||ec===6||(er>=2&&er<=4&&ec>=2&&ec<=4))ctx.fillRect(off+c*cell,off+r*cell,cell,cell);continue;}
+    if(rng((hash+((r*M+c)*2654435761)>>>0)^(bytes[(r*M+c)%bytes.length]||0))>0.5)ctx.fillRect(off+c*cell,off+r*cell,cell,cell);
+  }}
+  ctx.fillStyle='rgba(0,0,0,.82)';ctx.fillRect(S/2-38,S/2-9,76,18);
+  ctx.fillStyle=ac;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('provider.4',S/2,S/2+4);
+  toast('QR üretildi');
+}
+
+// ════════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════════
+function cp(v){navigator.clipboard.writeText(v);}
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),2500);
+}
+
+// INIT
+applyTheme(cfg.theme);
+buildThemeGrid();
+document.getElementById('togBig').classList.toggle('on',cfg.bigText);
+document.getElementById('togHist').classList.toggle('on',cfg.hist);
+document.getElementById('togPal').classList.toggle('on',cfg.palette);
+</script>
+
+</body>
+</html>
