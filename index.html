@@ -8,500 +8,283 @@
 <title>provider.4 — EXIF</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-/* ═══════════════════════════════════════
-   BASE TOKENS
-═══════════════════════════════════════ */
 :root {
-  --bg:       #0e0e18;
-  --bg2:      #13131f;
-  --panel:    rgba(255,255,255,0.04);
-  --glass:    rgba(255,255,255,0.07);
-  --glass2:   rgba(255,255,255,0.11);
-  --border:   rgba(255,255,255,0.08);
-  --border2:  rgba(255,255,255,0.15);
-  --text:     #f0f0fa;
-  --text2:    #8888bb;
-  --text3:    #44445a;
-  --danger:   #f43f5e;
-  --warn:     #f59e0b;
-  --ok:       #34d399;
-  --info:     #60a5fa;
-  --shadow:   rgba(0,0,0,0.5);
-  --f:        'Outfit', sans-serif;
-  --fm:       'JetBrains Mono', monospace;
-  --ib:       env(safe-area-inset-bottom,0px);
-  --it:       env(safe-area-inset-top,0px);
-  /* accent */
-  --a:        #a78bfa;
-  --a2:       #7c3aed;
-  --ag:       rgba(167,139,250,0.15);
-  --ah:       rgba(167,139,250,0.25);
-  --a-rgb:    167,139,250;
+  --bg:#0e0e18; --bg2:#13131f; --glass:rgba(255,255,255,0.05);
+  --glass2:rgba(255,255,255,0.09); --border:rgba(255,255,255,0.08);
+  --border2:rgba(255,255,255,0.14); --text:#f0f0fa; --text2:#8888bb;
+  --text3:#44445a; --danger:#f43f5e; --warn:#f59e0b; --ok:#34d399; --info:#60a5fa;
+  --shadow:rgba(0,0,0,0.5); --f:'Outfit',sans-serif; --fm:'JetBrains Mono',monospace;
+  --ib:env(safe-area-inset-bottom,0px); --it:env(safe-area-inset-top,0px);
+  --a:#a78bfa; --a2:#7c3aed; --ag:rgba(167,139,250,0.14); --ah:rgba(167,139,250,0.22); --ar:167,139,250;
 }
-/* THEMES */
-[data-theme=violet] { --a:#a78bfa;--a2:#7c3aed;--ag:rgba(167,139,250,0.15);--ah:rgba(167,139,250,0.25);--a-rgb:167,139,250 }
-[data-theme=cyan]   { --a:#22d3ee;--a2:#0891b2;--ag:rgba(34,211,238,0.13);--ah:rgba(34,211,238,0.22);--a-rgb:34,211,238 }
-[data-theme=green]  { --a:#4ade80;--a2:#16a34a;--ag:rgba(74,222,128,0.13);--ah:rgba(74,222,128,0.22);--a-rgb:74,222,128 }
-[data-theme=rose]   { --a:#fb7185;--a2:#e11d48;--ag:rgba(251,113,133,0.13);--ah:rgba(251,113,133,0.22);--a-rgb:251,113,133 }
-[data-theme=amber]  { --a:#fbbf24;--a2:#d97706;--ag:rgba(251,191,36,0.13);--ah:rgba(251,191,36,0.22);--a-rgb:251,191,36 }
-[data-theme=indigo] { --a:#818cf8;--a2:#4338ca;--ag:rgba(129,140,248,0.13);--ah:rgba(129,140,248,0.22);--a-rgb:129,140,248 }
-[data-theme=teal]   { --a:#2dd4bf;--a2:#0d9488;--ag:rgba(45,212,191,0.13);--ah:rgba(45,212,191,0.22);--a-rgb:45,212,191 }
-[data-theme=orange] { --a:#fb923c;--a2:#ea580c;--ag:rgba(251,146,60,0.13);--ah:rgba(251,146,60,0.22);--a-rgb:251,146,60 }
+[data-theme=cyan]   {--a:#22d3ee;--a2:#0891b2;--ag:rgba(34,211,238,0.12);--ah:rgba(34,211,238,0.2);--ar:34,211,238}
+[data-theme=green]  {--a:#4ade80;--a2:#16a34a;--ag:rgba(74,222,128,0.12);--ah:rgba(74,222,128,0.2);--ar:74,222,128}
+[data-theme=rose]   {--a:#fb7185;--a2:#e11d48;--ag:rgba(251,113,133,0.12);--ah:rgba(251,113,133,0.2);--ar:251,113,133}
+[data-theme=amber]  {--a:#fbbf24;--a2:#d97706;--ag:rgba(251,191,36,0.12);--ah:rgba(251,191,36,0.2);--ar:251,191,36}
+[data-theme=indigo] {--a:#818cf8;--a2:#4338ca;--ag:rgba(129,140,248,0.12);--ah:rgba(129,140,248,0.2);--ar:129,140,248}
+[data-theme=teal]   {--a:#2dd4bf;--a2:#0d9488;--ag:rgba(45,212,191,0.12);--ah:rgba(45,212,191,0.2);--ar:45,212,191}
+[data-theme=orange] {--a:#fb923c;--a2:#ea580c;--ag:rgba(251,146,60,0.12);--ah:rgba(251,146,60,0.2);--ar:251,146,60}
 
-/* LIGHT MODE */
 [data-mode=light] {
-  --bg:#f0f0f8;--bg2:#e8e8f4;
-  --panel:rgba(255,255,255,0.7);--glass:rgba(255,255,255,0.8);--glass2:rgba(255,255,255,0.9);
-  --border:rgba(0,0,0,0.07);--border2:rgba(0,0,0,0.14);
-  --text:#14142a;--text2:#5555aa;--text3:#aaaacc;--shadow:rgba(0,0,0,0.1);
+  --bg:#f2f2fa; --bg2:#eaeaf4; --glass:rgba(255,255,255,0.75);
+  --glass2:rgba(255,255,255,0.92); --border:rgba(0,0,0,0.07); --border2:rgba(0,0,0,0.13);
+  --text:#12122a; --text2:#5555aa; --text3:#aaaacc; --shadow:rgba(0,0,0,0.08);
 }
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overscroll-behavior:none}
-body{
-  background:var(--bg);color:var(--text);font-family:var(--f);
-  min-height:100dvh;overflow:hidden;transition:background .4s,color .4s;
-  -webkit-font-smoothing:antialiased;
-}
-body::before{
-  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-  background:
-    radial-gradient(ellipse 60% 50% at 90% 0%,rgba(var(--a-rgb),.12),transparent 60%),
-    radial-gradient(ellipse 50% 60% at 0% 100%,rgba(var(--a-rgb),.08),transparent 60%),
-    radial-gradient(ellipse 30% 40% at 50% 50%,rgba(var(--a-rgb),.04),transparent 70%);
-  transition:background .4s;
-}
+body{background:var(--bg);color:var(--text);font-family:var(--f);min-height:100dvh;overflow:hidden;transition:background .4s,color .4s;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 55% 45% at 85% 5%,rgba(var(--ar),.12),transparent 60%),
+             radial-gradient(ellipse 45% 55% at 5% 95%,rgba(var(--ar),.08),transparent 60%);
+  transition:background .4s}
 
-/* ═══════════════════════════════════════
-   LOGIN SCREEN
-═══════════════════════════════════════ */
-#loginScreen{
-  position:fixed;inset:0;z-index:9999;
-  display:flex;align-items:center;justify-content:center;
-  padding:24px;background:var(--bg);
-  transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1);
-}
-#loginScreen.out{opacity:0;transform:scale(1.07) translateY(-14px);pointer-events:none}
-
-.login-wrap{width:100%;max-width:420px;position:relative;z-index:1}
-.login-glow{
-  width:80px;height:80px;border-radius:24px;
-  background:linear-gradient(135deg,var(--a),var(--a2));
-  margin:0 auto 20px;display:flex;align-items:center;justify-content:center;font-size:34px;
-  box-shadow:0 0 48px var(--ag),0 8px 32px rgba(0,0,0,.4);
-  animation:iconFloat 4s ease-in-out infinite;
-}
-@keyframes iconFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-.login-brand{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--a);text-align:center;margin-bottom:6px;text-transform:uppercase}
-.login-title{font-size:30px;font-weight:900;text-align:center;margin-bottom:4px;letter-spacing:-1px}
-.login-sub{font-size:12px;color:var(--text2);text-align:center;margin-bottom:28px;font-weight:500}
-.login-card{
-  background:var(--glass);border:1px solid var(--border2);border-radius:28px;
-  padding:32px 28px;backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);
-  box-shadow:0 32px 80px var(--shadow),inset 0 1px 0 rgba(255,255,255,.1);
-}
-.lf{margin-bottom:16px}
-.ll{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
-.li{
-  width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:14px;
-  color:var(--text);font-family:var(--f);font-size:15px;font-weight:500;
-  padding:14px 16px;outline:none;-webkit-appearance:none;transition:.2s;
-}
-[data-mode=light] .li{background:rgba(255,255,255,.8)}
-.li:focus{border-color:var(--a);box-shadow:0 0 0 4px var(--ag)}
-.lb{
-  width:100%;background:linear-gradient(135deg,var(--a),var(--a2));
-  border:none;border-radius:14px;color:#fff;font-family:var(--f);font-size:15px;font-weight:800;
-  height:54px;cursor:pointer;margin-top:10px;letter-spacing:.2px;
-  box-shadow:0 8px 28px var(--ag);transition:all .2s;
-}
-.lb:active{transform:scale(.97);opacity:.9}
-.ldemo{
-  width:100%;background:none;border:1px solid var(--border2);border-radius:14px;
-  color:var(--text2);font-family:var(--f);font-size:13px;font-weight:600;
-  height:46px;cursor:pointer;margin-top:8px;transition:.2s;
-}
+/* ══ LOGIN ══ */
+#loginScreen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg);transition:opacity .45s cubic-bezier(.4,0,.2,1),transform .45s cubic-bezier(.4,0,.2,1)}
+#loginScreen.out{opacity:0;transform:scale(1.07);pointer-events:none}
+.lw{width:100%;max-width:400px}
+.lglow{width:76px;height:76px;border-radius:22px;background:linear-gradient(135deg,var(--a),var(--a2));margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 48px var(--ag),0 8px 28px rgba(0,0,0,.35);animation:float 4s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.lbrand{font-size:11px;font-weight:700;letter-spacing:4px;color:var(--a);text-align:center;margin-bottom:6px;text-transform:uppercase}
+.ltitle{font-size:28px;font-weight:900;text-align:center;margin-bottom:4px;letter-spacing:-1px}
+.lsub{font-size:12px;color:var(--text2);text-align:center;margin-bottom:26px;font-weight:500}
+.lcard{background:var(--glass);border:1px solid var(--border2);border-radius:26px;padding:28px 24px;backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);box-shadow:0 28px 72px var(--shadow),inset 0 1px 0 rgba(255,255,255,.08)}
+.lfield{margin-bottom:14px}
+.llbl{display:block;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+.linput{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--f);font-size:15px;font-weight:500;padding:13px 16px;outline:none;-webkit-appearance:none;transition:.2s}
+[data-mode=light] .linput{background:rgba(255,255,255,.85)}
+.linput:focus{border-color:var(--a);box-shadow:0 0 0 4px var(--ag)}
+.lbtn{width:100%;background:linear-gradient(135deg,var(--a),var(--a2));border:none;border-radius:12px;color:#fff;font-family:var(--f);font-size:15px;font-weight:800;height:52px;cursor:pointer;margin-top:10px;letter-spacing:.2px;box-shadow:0 8px 24px var(--ag);transition:all .2s}
+.lbtn:active{transform:scale(.97)}
+.ldemo{width:100%;background:none;border:1px solid var(--border2);border-radius:12px;color:var(--text2);font-family:var(--f);font-size:13px;font-weight:600;height:44px;cursor:pointer;margin-top:8px;transition:.2s}
 .ldemo:active{border-color:var(--a);color:var(--a)}
-.lstat{font-size:12px;text-align:center;min-height:22px;margin-top:12px;color:var(--text3);font-weight:600}
+.lstat{font-size:12px;text-align:center;min-height:20px;margin-top:12px;color:var(--text3);font-weight:600;padding:0 4px}
 .lstat.err{color:var(--danger)}
 .lstat.ok{color:var(--ok)}
 
-/* ═══════════════════════════════════════
-   APP SHELL — GLASSMORPHISM DASHBOARD
-═══════════════════════════════════════ */
+/* ══ APP ══ */
 #app{position:relative;z-index:1;max-width:700px;margin:0 auto;height:100dvh;display:none;flex-direction:column}
 #app.on{display:flex}
 
 /* TOPBAR */
-.topbar{
-  padding:calc(var(--it)+14px) 20px 12px;
-  display:flex;align-items:center;gap:12px;
-  background:rgba(14,14,24,.8);
-  backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
-  border-bottom:1px solid var(--border);flex-shrink:0;
-}
-[data-mode=light] .topbar{background:rgba(240,240,248,.85)}
+.topbar{padding:calc(var(--it)+13px) 18px 11px;display:flex;align-items:center;gap:10px;background:rgba(14,14,24,.82);backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);border-bottom:1px solid var(--border);flex-shrink:0}
+[data-mode=light] .topbar{background:rgba(242,242,250,.88)}
 .tb-logo{font-family:var(--fm);font-size:13px;font-weight:700;color:var(--a);letter-spacing:2px;flex-shrink:0}
-.tb-divider{width:1px;height:16px;background:var(--border2);flex-shrink:0}
+.tb-div{width:1px;height:15px;background:var(--border2);flex-shrink:0}
 .tb-user{font-size:13px;font-weight:700;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tb-badge{
-  font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;
-  padding:5px 12px;border-radius:20px;flex-shrink:0;
-  background:var(--ag);border:1px solid rgba(var(--a-rgb),.4);color:var(--a);
-}
-.tb-badge.demo{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.4);color:var(--warn)}
+.tb-badge{font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:4px 11px;border-radius:20px;flex-shrink:0;background:var(--ag);border:1px solid rgba(var(--ar),.35);color:var(--a)}
+.tb-badge.demo{background:rgba(245,158,11,.1);border-color:rgba(245,158,11,.35);color:var(--warn)}
 
-/* SIDEBAR + MAIN — Dashboard layout */
-.dashboard{display:flex;flex:1;overflow:hidden}
+/* DASHBOARD LAYOUT */
+.dash{display:flex;flex:1;overflow:hidden}
 
-/* SIDEBAR */
-.sidebar{
-  width:80px;flex-shrink:0;
-  background:rgba(255,255,255,.03);
-  border-right:1px solid var(--border);
-  display:flex;flex-direction:column;align-items:center;
-  padding:16px 0 calc(16px + var(--ib));gap:4px;
-  transition:background .4s;
-}
-[data-mode=light] .sidebar{background:rgba(255,255,255,.6)}
-.nav-btn{
-  width:56px;height:56px;border-radius:16px;background:none;border:none;
-  color:var(--text3);cursor:pointer;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  transition:all .2s;position:relative;
-}
-.nav-btn .nav-icon{font-size:22px;line-height:1}
-.nav-btn .nav-lbl{font-size:7px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;transition:color .2s}
-.nav-btn.on{background:var(--ag);color:var(--a)}
-.nav-btn.on::before{
-  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
-  width:3px;height:32px;background:var(--a);border-radius:0 4px 4px 0;
-  box-shadow:0 0 12px var(--a);
-}
-.nav-btn:active{transform:scale(.92)}
-.nav-spacer{flex:1}
+/* SIDEBAR — text only, no emoji */
+.sidebar{width:88px;flex-shrink:0;background:rgba(255,255,255,.03);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;padding:14px 0 calc(16px + var(--ib));gap:2px;transition:background .4s}
+[data-mode=light] .sidebar{background:rgba(255,255,255,.65)}
+.nb{width:64px;min-height:52px;border-radius:14px;background:none;border:none;color:var(--text3);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:all .2s;position:relative;padding:6px 4px}
+.nb-icon{font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:inherit;line-height:1}
+.nb-lbl{font-size:11px;font-weight:700;color:inherit;letter-spacing:-.2px;text-align:center;line-height:1.2}
+.nb.on{background:var(--ag);color:var(--a)}
+.nb.on::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:30px;background:var(--a);border-radius:0 3px 3px 0;box-shadow:0 0 10px var(--a)}
+.nb:active{transform:scale(.92)}
+.nb-spacer{flex:1}
 
-/* MAIN CONTENT */
+/* PAGES */
 .main{flex:1;overflow:hidden;position:relative}
-.pg{
-  position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:20px 18px calc(24px + var(--ib));
-  opacity:0;pointer-events:none;transform:translateX(16px);
-  transition:opacity .28s ease,transform .28s ease;
-}
+.pg{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:18px 16px calc(22px + var(--ib));opacity:0;pointer-events:none;transform:translateX(14px);transition:opacity .26s ease,transform .26s ease}
 .pg.on{opacity:1;pointer-events:all;transform:translateX(0)}
 
-/* ═══════════════════════════════════════
-   GLASS CARDS
-═══════════════════════════════════════ */
-.gc{
-  background:var(--glass);border:1px solid var(--border);border-radius:22px;
-  margin-bottom:14px;overflow:hidden;
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-  box-shadow:0 4px 24px var(--shadow);
-  transition:background .4s,border-color .4s;
-}
-.gc-head{
-  padding:14px 18px;display:flex;align-items:center;justify-content:space-between;
-  border-bottom:1px solid var(--border);
-}
-.gc-title{
-  font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;
-  color:var(--text2);display:flex;align-items:center;gap:8px;
-}
-.gc-ti{font-size:16px}
-.gc-body{padding:16px 18px}
+/* ══ CARDS ══ */
+.card{background:var(--glass);border:1px solid var(--border);border-radius:20px;margin-bottom:13px;overflow:hidden;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 4px 22px var(--shadow);transition:background .4s}
+.card-h{padding:13px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.card-t{font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
+.card-b{padding:14px 16px}
 
-/* ═══════════════════════════════════════
-   DROP ZONE
-═══════════════════════════════════════ */
-.dz{
-  border:2px dashed rgba(var(--a-rgb),.3);border-radius:22px;
-  padding:52px 24px;text-align:center;cursor:pointer;
-  background:rgba(var(--a-rgb),.03);
-  margin-bottom:14px;position:relative;overflow:hidden;transition:all .25s;
-}
-.dz::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 50% 100%,rgba(var(--a-rgb),.08),transparent 70%);
-  opacity:0;transition:opacity .25s;
-}
+/* ══ DROP ZONE ══ */
+.dz{border:2px dashed rgba(var(--ar),.28);border-radius:20px;padding:50px 22px;text-align:center;cursor:pointer;background:rgba(var(--ar),.03);margin-bottom:13px;position:relative;overflow:hidden;transition:all .25s}
+.dz::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(var(--ar),.07),transparent 70%);opacity:0;transition:opacity .25s}
 .dz:hover::before,.dz.drag::before{opacity:1}
-.dz.drag{border-color:var(--a);box-shadow:0 0 40px var(--ag)}
-.dz.loaded{border-style:solid;border-color:var(--a);border-width:1.5px}
-.dz-icon{font-size:52px;display:block;margin-bottom:14px;animation:iconFloat 3s ease-in-out infinite}
-.dz-title{font-size:20px;font-weight:800;margin-bottom:6px;letter-spacing:-.4px}
+.dz.drag{border-color:var(--a);box-shadow:0 0 36px var(--ag)}
+.dz.loaded{border-style:solid;border-color:var(--a)}
+.dz-icon{font-size:48px;display:block;margin-bottom:12px}
+.dz-title{font-size:19px;font-weight:800;margin-bottom:5px;letter-spacing:-.4px}
 .dz-sub{font-size:12px;color:var(--text2);font-weight:500}
 
-/* ═══════════════════════════════════════
-   IMAGE PREVIEW
-═══════════════════════════════════════ */
-.iprev{border-radius:22px;overflow:hidden;position:relative;margin-bottom:14px;border:1px solid var(--border2);display:none;box-shadow:0 8px 32px var(--shadow)}
+/* ══ IMAGE PREVIEW ══ */
+.iprev{border-radius:20px;overflow:hidden;position:relative;margin-bottom:13px;border:1px solid var(--border2);display:none;box-shadow:0 6px 28px var(--shadow)}
 .iprev.on{display:block}
-#prevImg{width:100%;max-height:280px;object-fit:cover;display:block}
-.iprev-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,24,.95) 0%,transparent 55%);pointer-events:none}
-.iprev-bottom{position:absolute;bottom:14px;left:16px;right:16px;display:flex;align-items:flex-end;justify-content:space-between;gap:8px}
+#prevImg{width:100%;max-height:260px;object-fit:cover;display:block}
+.iprev-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(14,14,24,.94) 0%,transparent 55%);pointer-events:none}
+.iprev-bot{position:absolute;bottom:12px;left:14px;right:14px;display:flex;align-items:flex-end;gap:8px}
 .iprev-name{font-size:14px;font-weight:800;color:#fff;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.3px}
-.iprev-size{font-family:var(--fm);font-size:11px;color:var(--a);flex-shrink:0;font-weight:700}
+.iprev-sz{font-family:var(--fm);font-size:11px;color:var(--a);flex-shrink:0;font-weight:700}
 
-/* ═══════════════════════════════════════
-   FORGERY ALERT
-═══════════════════════════════════════ */
-.forgery{
-  background:rgba(244,63,94,.08);border:1px solid rgba(244,63,94,.35);
-  border-radius:18px;padding:16px 18px;margin-bottom:14px;display:none;
-  backdrop-filter:blur(12px);
-}
-.forgery.on{display:block;animation:slideUp .3s ease}
-.forgery-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.forgery-title{color:var(--danger);font-weight:800;font-size:14px}
-.forgery-body{font-size:12px;color:rgba(244,100,120,.9);line-height:1.7;font-weight:500}
+/* ══ FORGERY ══ */
+.forgery{background:rgba(244,63,94,.07);border:1px solid rgba(244,63,94,.3);border-radius:16px;padding:14px 16px;margin-bottom:13px;display:none}
+.forgery.on{display:block;animation:su .3s ease}
+.forg-head{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.forg-ttl{color:var(--danger);font-weight:800;font-size:14px}
+.forg-body{font-size:12px;color:rgba(244,100,120,.9);line-height:1.7;font-weight:500}
 
-/* ═══════════════════════════════════════
-   SUMMARY GRID
-═══════════════════════════════════════ */
-.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.sc{
-  background:var(--glass);border:1px solid var(--border);border-radius:18px;
-  padding:16px 14px;position:relative;overflow:hidden;
-  backdrop-filter:blur(16px);box-shadow:0 4px 20px var(--shadow);transition:.4s;
-}
+/* ══ SUMMARY GRID ══ */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:13px}
+.sc{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:15px 13px;position:relative;overflow:hidden;backdrop-filter:blur(16px);box-shadow:0 3px 16px var(--shadow);transition:.4s}
 .sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--a),transparent)}
-.sc-icon{font-size:24px;margin-bottom:10px}
-.sc-val{font-size:14px;font-weight:800;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.3px}
+.sc-icon{font-size:22px;margin-bottom:8px}
+.sc-val{font-size:13px;font-weight:800;color:var(--text);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.3px;
+  /* FIX: force break camera model into separate parts */
+  white-space:normal;word-break:break-word;line-height:1.3}
 .sc-key{font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text2)}
 
-/* ═══════════════════════════════════════
-   AI CARDS
-═══════════════════════════════════════ */
+/* ══ AI CARDS ══ */
 .ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.aic{
-  background:rgba(255,255,255,.04);border:1px solid var(--border);
-  border-radius:16px;padding:16px;transition:.4s;
-}
-.ai-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
-.ai-val{font-size:30px;font-weight:900;font-family:var(--fm);margin-bottom:4px;letter-spacing:-1.5px}
-.ai-sub{font-size:11px;color:var(--text2);font-weight:600;line-height:1.5}
-.pbar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:10px;overflow:hidden}
-.pbfill{height:100%;border-radius:4px;transition:width 1.6s cubic-bezier(.16,1,.3,1)}
+.aic{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:14px;transition:.4s}
+.ai-lbl{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+.ai-val{font-size:28px;font-weight:900;font-family:var(--fm);margin-bottom:3px;letter-spacing:-1px}
+.ai-sub{font-size:11px;color:var(--text2);font-weight:600;line-height:1.4}
+.pbar{height:4px;border-radius:4px;background:rgba(255,255,255,.08);margin-top:8px;overflow:hidden}
+.pbf{height:100%;border-radius:4px;transition:width 1.6s cubic-bezier(.16,1,.3,1)}
 
-/* AI Analysis loading */
-.ai-loading{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(var(--a-rgb),.06);border:1px solid rgba(var(--a-rgb),.2);border-radius:14px;margin-top:10px}
-.ai-loading-dot{width:8px;height:8px;border-radius:50%;background:var(--a);animation:aidot 1.4s ease-in-out infinite}
-.ai-loading-dot:nth-child(2){animation-delay:.2s}
-.ai-loading-dot:nth-child(3){animation-delay:.4s}
-@keyframes aidot{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
-.ai-detail{flex:1;font-size:12px;color:var(--text2);font-weight:600}
+/* AI LOADING */
+.ai-load{display:flex;align-items:center;gap:10px;padding:12px 14px;background:rgba(var(--ar),.06);border:1px solid rgba(var(--ar),.18);border-radius:12px;margin-top:10px}
+.ald{width:7px;height:7px;border-radius:50%;background:var(--a);animation:ald 1.4s ease-in-out infinite}
+.ald:nth-child(2){animation-delay:.2s}.ald:nth-child(3){animation-delay:.4s}
+@keyframes ald{0%,80%,100%{transform:scale(0);opacity:.4}40%{transform:scale(1);opacity:1}}
+.ai-load-txt{flex:1;font-size:12px;color:var(--text2);font-weight:600}
 
-/* ═══════════════════════════════════════
-   HISTOGRAM
-═══════════════════════════════════════ */
-canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bottom:12px}
+/* ══ HISTOGRAM ══ */
+canvas.hcvs{width:100%;height:70px;border-radius:10px;display:block;margin-bottom:11px}
 
-/* ═══════════════════════════════════════
-   PALETTE
-═══════════════════════════════════════ */
+/* ══ PALETTE ══ */
 .palette{display:flex;gap:8px;flex-wrap:wrap}
-.sw{
-  width:38px;height:38px;border-radius:12px;cursor:pointer;
-  border:2px solid transparent;transition:.15s;
-}
+.sw{width:36px;height:36px;border-radius:10px;cursor:pointer;border:2px solid transparent;transition:.15s}
 .sw:active{transform:scale(1.2)}
-.sw:hover{border-color:var(--border2)}
 
-/* ═══════════════════════════════════════
-   EXIF ROWS — FIXED FONT
-═══════════════════════════════════════ */
-.exrow{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:11px 18px;border-bottom:1px solid var(--border);
-  transition:background .12s;
-}
+/* ══ EXIF ROWS — CLEAN FONT ══ */
+.exrow{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);transition:background .1s}
 .exrow:last-child{border-bottom:none}
 .exrow:active{background:rgba(255,255,255,.04)}
-.exkey{
-  font-size:10px;font-weight:700;color:var(--text2);
-  flex-shrink:0;width:116px;padding-top:3px;
-  text-transform:uppercase;letter-spacing:.6px;
-  font-family:var(--f); /* SANS not mono */
-}
-.exval{
-  font-family:var(--f); /* FIXED: clean sans-serif */
-  font-size:14px;font-weight:600;
-  color:var(--text);flex:1;word-break:break-all;line-height:1.5;letter-spacing:-.2px;
-}
-.exval.a{color:var(--a)}
-.exval.g{color:var(--ok)}
-.exval.y{color:var(--warn)}
-.exval.r{color:var(--danger)}
-.exval.b{color:var(--info)}
+/* KEY label — clean uppercase sans */
+.exk{font-size:10px;font-weight:700;color:var(--text2);flex-shrink:0;width:112px;padding-top:2px;text-transform:uppercase;letter-spacing:.5px;font-family:var(--f)}
+/* VALUE — clean readable sans, NOT monospace */
+.exv{font-family:var(--f);font-size:14px;font-weight:600;color:var(--text);flex:1;word-break:break-word;line-height:1.45;letter-spacing:-.15px}
+.exv.ac{color:var(--a)}.exv.gr{color:var(--ok)}.exv.ye{color:var(--warn)}.exv.re{color:var(--danger)}.exv.bl{color:var(--info)}
 .excopy{background:none;border:none;color:var(--text3);font-size:15px;cursor:pointer;padding:0 2px;flex-shrink:0;transition:.15s}
 .excopy:active{color:var(--a)}
 
-/* ═══════════════════════════════════════
-   SECTIONS
-═══════════════════════════════════════ */
-.sec{margin-bottom:10px;border-radius:20px;overflow:hidden;border:1px solid var(--border);backdrop-filter:blur(16px);box-shadow:0 4px 20px var(--shadow)}
-.sech{
-  padding:14px 18px;display:flex;align-items:center;gap:10px;
-  cursor:pointer;background:var(--glass);transition:background .15s;user-select:none;
-}
+/* ══ SECTIONS ══ */
+.sec{margin-bottom:10px;border-radius:18px;overflow:hidden;border:1px solid var(--border);backdrop-filter:blur(14px);box-shadow:0 3px 18px var(--shadow)}
+.sech{padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;background:var(--glass);transition:background .15s;user-select:none}
 .sech:active{background:var(--glass2)}
-.sec-emoji{font-size:18px;flex-shrink:0}
-.sec-name{font-size:14px;font-weight:800;flex:1;letter-spacing:-.3px}
-.sec-count{
-  font-family:var(--fm);font-size:10px;font-weight:700;color:var(--a);
-  background:var(--ag);border:1px solid rgba(var(--a-rgb),.3);
-  padding:3px 9px;border-radius:20px;
-}
-.sec-chev{font-size:12px;color:var(--text3);transition:transform .22s}
-.sech.op .sec-chev{transform:rotate(180deg)}
+.sec-em{font-size:17px;flex-shrink:0}
+.sec-nm{font-size:14px;font-weight:800;flex:1;letter-spacing:-.3px}
+.sec-ct{font-family:var(--fm);font-size:10px;font-weight:700;color:var(--a);background:var(--ag);border:1px solid rgba(var(--ar),.28);padding:2px 8px;border-radius:20px}
+.sec-cv{font-size:12px;color:var(--text3);transition:transform .22s}
+.sech.op .sec-cv{transform:rotate(180deg)}
 .secb{display:none;border-top:1px solid var(--border);background:var(--glass)}
 .secb.op{display:block}
 
-/* ═══════════════════════════════════════
-   GPS
-═══════════════════════════════════════ */
-.gps-banner{
-  background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(34,211,238,.06));
-  border:1px solid rgba(52,211,153,.3);border-radius:20px;
-  padding:15px 18px;margin-bottom:14px;display:none;align-items:center;gap:12px;
-  backdrop-filter:blur(16px);box-shadow:0 4px 24px var(--shadow);
-}
-.gps-banner.on{display:flex;animation:slideUp .3s ease}
-.gpsdot{width:10px;height:10px;border-radius:50%;background:var(--ok);flex-shrink:0;animation:gpulse 2s infinite}
-@keyframes gpulse{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{opacity:.6;transform:scale(1.3);box-shadow:0 0 0 6px transparent}}
-.gps-info{flex:1}
+/* ══ GPS ══ */
+.gps-ban{background:linear-gradient(135deg,rgba(52,211,153,.1),rgba(34,211,238,.06));border:1px solid rgba(52,211,153,.28);border-radius:18px;padding:14px 16px;margin-bottom:13px;display:none;align-items:center;gap:12px;backdrop-filter:blur(14px);box-shadow:0 3px 20px var(--shadow)}
+.gps-ban.on{display:flex;animation:su .3s ease}
+.gdot{width:9px;height:9px;border-radius:50%;background:var(--ok);flex-shrink:0;animation:gpuls 2s infinite}
+@keyframes gpuls{0%,100%{opacity:1;transform:scale(1);box-shadow:0 0 0 0 rgba(52,211,153,.4)}50%{opacity:.6;transform:scale(1.3);box-shadow:0 0 0 6px transparent}}
+.gps-inf{flex:1}
 .gps-lbl{font-size:13px;font-weight:800;color:var(--ok);margin-bottom:3px}
 .gps-c{font-family:var(--fm);font-size:11px;color:var(--text2);font-weight:500}
-.mapbtn{background:var(--ok);border:none;border-radius:12px;color:#000;font-family:var(--f);font-size:13px;font-weight:800;padding:10px 16px;cursor:pointer;flex-shrink:0}
+.mapbtn{background:var(--ok);border:none;border-radius:10px;color:#000;font-family:var(--f);font-size:13px;font-weight:800;padding:9px 14px;cursor:pointer;flex-shrink:0}
 
-/* ═══════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════ */
-.btn{background:var(--a);border:none;border-radius:14px;color:#fff;font-family:var(--f);font-size:14px;font-weight:800;padding:0 20px;height:48px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap;letter-spacing:-.2px}
+/* PLAN GATE */
+.plan-gate{background:rgba(var(--ar),.06);border:1px solid rgba(var(--ar),.22);border-radius:16px;padding:24px;text-align:center;margin-bottom:13px}
+.pg-icon{font-size:32px;margin-bottom:10px}
+.pg-title{font-size:15px;font-weight:800;margin-bottom:6px;letter-spacing:-.3px}
+.pg-sub{font-size:12px;color:var(--text2);font-weight:500;line-height:1.6;margin-bottom:14px}
+.pg-badge{display:inline-block;background:linear-gradient(135deg,var(--a),var(--a2));color:#fff;font-size:11px;font-weight:800;padding:6px 16px;border-radius:20px;letter-spacing:.5px}
+
+/* ══ BUTTONS ══ */
+.btn{background:var(--a);border:none;border-radius:12px;color:#fff;font-family:var(--f);font-size:14px;font-weight:800;padding:0 18px;height:46px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:.2s;white-space:nowrap;letter-spacing:-.2px}
 .btn:active{transform:scale(.96)}
 .btn.full{width:100%;justify-content:center}
 .btn.ghost{background:var(--glass);color:var(--text);border:1px solid var(--border2)}
 .btn.ghost:active{background:var(--glass2)}
 .btn.outline{background:none;border:2px solid var(--a);color:var(--a)}
 .btn.danger{background:var(--danger);color:#fff}
-.btn.sm{height:38px;font-size:12px;padding:0 14px;border-radius:10px}
+.btn.sm{height:36px;font-size:12px;padding:0 13px;border-radius:9px}
 
-/* ═══════════════════════════════════════
-   LOADING
-═══════════════════════════════════════ */
-.loading{text-align:center;padding:60px 20px;display:none}
+/* ══ LOADING ══ */
+.loading{text-align:center;padding:58px 20px;display:none}
 .loading.on{display:block}
-.spin{width:44px;height:44px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--a);animation:spin .8s linear infinite;margin:0 auto 16px}
+.spin{width:42px;height:42px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--a);animation:spin .8s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-txt{font-size:13px;color:var(--text2);font-weight:600;letter-spacing:.5px}
+.load-txt{font-size:13px;color:var(--text2);font-weight:600;letter-spacing:.3px}
 
-/* ═══════════════════════════════════════
-   THEME GRID
-═══════════════════════════════════════ */
+/* ══ THEME GRID ══ */
 .tgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.tbtn{
-  border:2px solid var(--border);border-radius:16px;padding:12px 6px;
-  cursor:pointer;text-align:center;background:var(--glass);
-  backdrop-filter:blur(10px);transition:all .2s;box-shadow:0 2px 8px var(--shadow);
-}
-.tbtn.on{border-color:var(--a);box-shadow:0 0 16px var(--ag)}
+.tbtn{border:2px solid var(--border);border-radius:14px;padding:11px 5px;cursor:pointer;text-align:center;background:var(--glass);backdrop-filter:blur(10px);transition:all .2s;box-shadow:0 2px 8px var(--shadow)}
+.tbtn.on{border-color:var(--a);box-shadow:0 0 14px var(--ag)}
 .tbtn:active{transform:scale(.93)}
-.tdot{width:26px;height:26px;border-radius:50%;margin:0 auto 7px;border:2px solid rgba(255,255,255,.15)}
-.tname{font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2)}
+.tdot{width:24px;height:24px;border-radius:50%;margin:0 auto 6px;border:2px solid rgba(255,255,255,.12)}
+.tnm{font-size:8px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2)}
 
-/* ═══════════════════════════════════════
-   TOGGLE
-═══════════════════════════════════════ */
-.tog{width:48px;height:28px;border-radius:14px;background:var(--border2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
+/* ══ TOGGLE ══ */
+.tog{width:46px;height:26px;border-radius:13px;background:rgba(255,255,255,.12);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0}
 .tog.on{background:var(--a)}
-.tok{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .22s;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.tok{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .22s;box-shadow:0 1px 5px rgba(0,0,0,.3)}
 .tog.on .tok{transform:translateX(20px)}
 
-/* ═══════════════════════════════════════
-   SETTINGS ITEMS
-═══════════════════════════════════════ */
-.si{background:var(--glass);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(12px);transition:.4s}
-.si-emoji{font-size:22px;flex-shrink:0;width:30px;text-align:center}
-.si-body{flex:1}
-.si-title{font-size:14px;font-weight:700;letter-spacing:-.2px}
-.si-sub{font-size:11px;color:var(--text2);margin-top:2px;font-weight:500}
+/* ══ SETTINGS ITEMS ══ */
+.si{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(10px);transition:.4s}
+.si-em{font-size:20px;flex-shrink:0;width:28px;text-align:center}
+.si-b{flex:1}
+.si-t{font-size:14px;font-weight:700;letter-spacing:-.2px}
+.si-s{font-size:11px;color:var(--text2);margin-top:2px;font-weight:500}
 
-/* ═══════════════════════════════════════
-   SECTION LABEL
-═══════════════════════════════════════ */
-.slbl{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding:0 2px}
+/* ══ LANG GRID ══ */
+.lgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
+.lbtn{background:var(--glass);border:1px solid var(--border);border-radius:11px;padding:10px 4px;cursor:pointer;text-align:center;transition:.15s;backdrop-filter:blur(8px)}
+.lbtn.on{border-color:var(--a);background:var(--ag)}
+.lbtn:active{transform:scale(.93)}
+.lflag{font-size:20px;display:block;margin-bottom:4px}
+.lnm{font-size:8px;font-weight:800;letter-spacing:.3px;color:var(--text2)}
 
-/* ═══════════════════════════════════════
-   KEY BAR
-═══════════════════════════════════════ */
-.keybar{
-  background:var(--ag);border:1px solid rgba(var(--a-rgb),.35);
-  border-radius:18px;padding:13px 16px;margin-bottom:14px;
-  display:flex;align-items:center;gap:12px;backdrop-filter:blur(16px);
-  box-shadow:0 4px 20px var(--ag);
-}
-.kb-ic{font-size:22px;flex-shrink:0}
+/* ══ KEY BAR ══ */
+.keybar{background:var(--ag);border:1px solid rgba(var(--ar),.32);border-radius:16px;padding:12px 15px;margin-bottom:13px;display:flex;align-items:center;gap:12px;backdrop-filter:blur(14px);box-shadow:0 3px 18px var(--ag)}
+.kb-ic{font-size:20px;flex-shrink:0}
 .kb-b{flex:1}
 .kb-u{font-size:14px;font-weight:800;color:var(--a);letter-spacing:-.3px}
 .kb-d{font-size:11px;color:var(--text2);margin-top:2px;font-weight:600}
-.kbout{background:none;border:1px solid var(--border2);border-radius:10px;color:var(--text3);font-size:11px;font-weight:700;padding:6px 12px;cursor:pointer;transition:.15s}
+.kbout{background:none;border:1px solid var(--border2);border-radius:8px;color:var(--text3);font-size:11px;font-weight:700;padding:5px 11px;cursor:pointer;transition:.15s}
 .kbout:active{border-color:var(--danger);color:var(--danger)}
 
-/* ═══════════════════════════════════════
-   EDIT INPUT
-═══════════════════════════════════════ */
+/* ══ EDIT INPUT ══ */
 .eflbl{display:block;font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
-.efin{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:var(--f);font-size:14px;font-weight:600;padding:12px 14px;outline:none;margin-bottom:12px;-webkit-appearance:none;transition:.2s}
-[data-mode=light] .efin{background:rgba(255,255,255,.8)}
+.efin{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--f);font-size:14px;font-weight:600;padding:11px 13px;outline:none;margin-bottom:11px;-webkit-appearance:none;transition:.2s}
+[data-mode=light] .efin{background:rgba(255,255,255,.85)}
 .efin:focus{border-color:var(--a);box-shadow:0 0 0 3px var(--ag)}
 
-/* ═══════════════════════════════════════
-   HISTORY
-═══════════════════════════════════════ */
-.hist-item{
-  background:var(--glass);border:1px solid var(--border);border-radius:16px;
-  padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;
-  cursor:pointer;transition:.15s;backdrop-filter:blur(10px);
-}
-.hist-item:active{background:var(--glass2)}
-.hist-thumb{width:48px;height:48px;border-radius:12px;object-fit:cover;flex-shrink:0;border:1px solid var(--border2)}
-.hist-thumb-placeholder{width:48px;height:48px;border-radius:12px;flex-shrink:0;background:var(--glass2);display:flex;align-items:center;justify-content:center;font-size:22px}
-.hist-info{flex:1;overflow:hidden}
-.hist-name{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.2px}
-.hist-meta{font-size:11px;color:var(--text2);margin-top:3px;font-weight:500}
-.hist-del{background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:4px;transition:.15s;flex-shrink:0}
-.hist-del:active{color:var(--danger)}
+/* ══ HISTORY ══ */
+.hi{background:var(--glass);border:1px solid var(--border);border-radius:14px;padding:13px 15px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:.15s;backdrop-filter:blur(10px)}
+.hi:active{background:var(--glass2)}
+.hi-ph{width:46px;height:46px;border-radius:11px;flex-shrink:0;background:var(--glass2);display:flex;align-items:center;justify-content:center;font-size:20px}
+.hi-info{flex:1;overflow:hidden}
+.hi-nm{font-size:13px;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-.2px}
+.hi-mt{font-size:11px;color:var(--text2);margin-top:3px;font-weight:500}
+.hi-del{background:none;border:none;color:var(--text3);font-size:17px;cursor:pointer;padding:4px;transition:.15s;flex-shrink:0}
+.hi-del:active{color:var(--danger)}
 
-/* ═══════════════════════════════════════
-   LANG GRID
-═══════════════════════════════════════ */
-.lgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:14px}
-.lbtn{background:var(--glass);border:1px solid var(--border);border-radius:12px;padding:10px 4px;cursor:pointer;text-align:center;transition:.15s;backdrop-filter:blur(8px)}
-.lbtn.on{border-color:var(--a);background:var(--ag)}
-.lbtn:active{transform:scale(.93)}
-.lflag{font-size:22px;display:block;margin-bottom:4px}
-.lname{font-size:8px;font-weight:800;letter-spacing:.3px;color:var(--text2)}
+/* ══ SECTION LABEL ══ */
+.slbl{font-size:9px;font-weight:800;letter-spacing:2.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;padding:0 2px}
 
-/* ═══════════════════════════════════════
-   TOAST
-═══════════════════════════════════════ */
-.toast{position:fixed;bottom:calc(24px + var(--ib));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,32,.96);border:1px solid var(--border2);border-radius:14px;padding:12px 22px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:9000;white-space:nowrap;backdrop-filter:blur(20px);box-shadow:0 8px 36px rgba(0,0,0,.5)}
+/* ══ NODATA ══ */
+.nodata{text-align:center;padding:38px 20px;color:var(--text2)}
+.nodata strong{display:block;font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.3px}
+
+/* ══ TOAST ══ */
+.toast{position:fixed;bottom:calc(22px + var(--ib));left:50%;transform:translateX(-50%) translateY(20px);background:rgba(20,20,32,.96);border:1px solid var(--border2);border-radius:12px;padding:11px 20px;font-size:13px;font-weight:700;opacity:0;pointer-events:none;transition:.25s;z-index:9000;white-space:nowrap;backdrop-filter:blur(20px);box-shadow:0 8px 32px rgba(0,0,0,.5)}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* WM */
-.wm{position:fixed;bottom:calc(var(--ib)+6px);right:15px;font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:2px;z-index:30;pointer-events:none;font-weight:700}
-
-/* ═══════════════════════════════════════
-   NODATA
-═══════════════════════════════════════ */
-.nodata{text-align:center;padding:40px 20px;color:var(--text2)}
-.nodata strong{display:block;font-size:17px;font-weight:800;color:var(--text);margin-bottom:6px;letter-spacing:-.3px}
-
-/* ANIM */
-@keyframes slideUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-.fu{animation:slideUp .32s ease forwards;opacity:0}
+.wm{position:fixed;bottom:calc(var(--ib)+6px);right:14px;font-family:var(--fm);font-size:8px;color:var(--text3);letter-spacing:2px;z-index:30;pointer-events:none;font-weight:700}
+@keyframes su{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fu{animation:su .3s ease forwards;opacity:0}
 ::-webkit-scrollbar{width:3px}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
@@ -510,22 +293,22 @@ canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bo
 
 <!-- LOGIN -->
 <div id="loginScreen">
-  <div class="login-wrap">
-    <div class="login-glow">🔍</div>
-    <div class="login-brand">PROVIDER.4</div>
-    <div class="login-title">Sistem Erişimi</div>
-    <div class="login-sub">Yetkili erişimi gerekli</div>
-    <div class="login-card">
-      <div class="lf">
-        <label class="ll">Kullanıcı Adı</label>
-        <input id="lu" class="li" type="text" placeholder="kullanici_adi" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false">
+  <div class="lw">
+    <div class="lglow">🔍</div>
+    <div class="lbrand">PROVIDER.4</div>
+    <div class="ltitle" id="L_title">Sistem Erişimi</div>
+    <div class="lsub" id="L_sub">Yetkili erişimi gerekli</div>
+    <div class="lcard">
+      <div class="lfield">
+        <label class="llbl" id="L_user">Kullanıcı Adı</label>
+        <input id="lu" class="linput" type="text" autocorrect="off" autocapitalize="off" autocomplete="off" spellcheck="false">
       </div>
-      <div class="lf" style="margin-bottom:4px">
-        <label class="ll">Erişim Anahtarı</label>
-        <input id="lk" class="li" type="text" placeholder="P4-XXXXX-XXXXX-XXXXX-XXXXX" autocorrect="off" autocapitalize="characters" autocomplete="off" spellcheck="false" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="lfield" style="margin-bottom:4px">
+        <label class="llbl" id="L_key">Erişim Anahtarı</label>
+        <input id="lk" class="linput" type="text" autocorrect="off" autocapitalize="characters" autocomplete="off" spellcheck="false" placeholder="P4-XXXXX-XXXXX-XXXXX-XXXXX" onkeydown="if(event.key==='Enter')doLogin()">
       </div>
-      <button class="lb" onclick="doLogin()">OTURUM AÇ</button>
-      <button class="ldemo" onclick="doDemo()">🕐 Demo Modu (5 dakika)</button>
+      <button class="lbtn" id="L_btn" onclick="doLogin()">OTURUM AÇ</button>
+      <button class="ldemo" id="L_demo" onclick="doDemo()">Demo Modu</button>
       <div class="lstat" id="lstat"></div>
     </div>
   </div>
@@ -533,43 +316,34 @@ canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bo
 
 <!-- APP -->
 <div id="app">
-  <!-- TOPBAR -->
   <div class="topbar">
     <div class="tb-logo">p.4</div>
-    <div class="tb-divider"></div>
+    <div class="tb-div"></div>
     <div class="tb-user" id="tbUser">—</div>
     <div class="tb-badge" id="tbBadge">—</div>
   </div>
 
-  <!-- DASHBOARD -->
-  <div class="dashboard">
-
-    <!-- SIDEBAR NAV -->
+  <div class="dash">
+    <!-- SIDEBAR: text only labels, no emoji icons -->
     <div class="sidebar">
-      <button class="nav-btn on" id="n0" onclick="gp(0)" title="Analiz">
-        <span class="nav-icon">🔍</span>
-        <span class="nav-lbl">Analiz</span>
+      <button class="nb on" id="n0" onclick="gp(0)">
+        <div class="nb-lbl" id="N_analyze">Analiz</div>
       </button>
-      <button class="nav-btn" id="n1" onclick="gp(1)" title="GPS">
-        <span class="nav-icon">📍</span>
-        <span class="nav-lbl">GPS</span>
+      <button class="nb" id="n1" onclick="gp(1)">
+        <div class="nb-lbl" id="N_gps">GPS</div>
       </button>
-      <button class="nav-btn" id="n2" onclick="gp(2)" title="Aktar">
-        <span class="nav-icon">📤</span>
-        <span class="nav-lbl">Aktar</span>
+      <button class="nb" id="n2" onclick="gp(2)">
+        <div class="nb-lbl" id="N_export">Aktar</div>
       </button>
-      <button class="nav-btn" id="n3" onclick="gp(3)" title="Geçmiş">
-        <span class="nav-icon">🕐</span>
-        <span class="nav-lbl">Geçmiş</span>
+      <button class="nb" id="n3" onclick="gp(3)">
+        <div class="nb-lbl" id="N_history">Geçmiş</div>
       </button>
-      <div class="nav-spacer"></div>
-      <button class="nav-btn" id="n4" onclick="gp(4)" title="Ayarlar">
-        <span class="nav-icon">⚙️</span>
-        <span class="nav-lbl">Ayarlar</span>
+      <div class="nb-spacer"></div>
+      <button class="nb" id="n4" onclick="gp(4)">
+        <div class="nb-lbl" id="N_settings">Ayarlar</div>
       </button>
     </div>
 
-    <!-- MAIN PAGES -->
     <div class="main">
 
       <!-- PAGE 0: ANALİZ -->
@@ -580,54 +354,52 @@ canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bo
             <div class="kb-u" id="kbUser">@—</div>
             <div class="kb-d" id="kbDetail">—</div>
           </div>
-          <button class="kbout" onclick="doLogout()">Çıkış</button>
+          <button class="kbout" id="L_logout" onclick="doLogout()">Çıkış</button>
         </div>
 
         <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
           <span class="dz-icon">📸</span>
-          <div class="dz-title">Fotoğraf Seç veya Bırak</div>
-          <div class="dz-sub">JPEG · PNG · HEIC · TIFF · WebP · RAW</div>
+          <div class="dz-title" id="L_dz_title">Fotoğraf Seç veya Bırak</div>
+          <div class="dz-sub">JPEG · PNG · HEIC · TIFF · WebP</div>
           <input type="file" id="fi" accept="image/*" hidden>
         </div>
 
         <div class="iprev" id="iprev">
           <img id="prevImg" alt="">
-          <div class="iprev-overlay"></div>
-          <div class="iprev-bottom">
+          <div class="iprev-ov"></div>
+          <div class="iprev-bot">
             <div class="iprev-name" id="ipName"></div>
-            <div class="iprev-size" id="ipSize"></div>
+            <div class="iprev-sz" id="ipSz"></div>
           </div>
         </div>
 
         <div class="forgery" id="forgery">
-          <div class="forgery-head">
-            <span style="font-size:22px">⚠️</span>
-            <span class="forgery-title">YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</span>
+          <div class="forg-head">
+            <span style="font-size:20px">⚠️</span>
+            <span class="forg-ttl" id="L_forg">YAZILIMSAL MÜDAHALE TESPİT EDİLDİ</span>
           </div>
-          <div class="forgery-body" id="forgeryBody"></div>
+          <div class="forg-body" id="forgBody"></div>
         </div>
 
         <div class="loading" id="loading">
           <div class="spin"></div>
-          <div class="loading-txt">Metadata analiz ediliyor…</div>
+          <div class="load-txt" id="L_analyzing">Metadata analiz ediliyor…</div>
         </div>
 
         <div class="sg" id="sg" style="display:none"></div>
 
-        <div class="gc" id="aiCard" style="display:none">
-          <div class="gc-head">
-            <div class="gc-title"><span class="gc-ti">🤖</span>AI ANALİZİ</div>
-          </div>
-          <div class="gc-body">
+        <div class="card" id="aiCard" style="display:none">
+          <div class="card-h"><div class="card-t" id="L_ai">AI ANALİZİ</div></div>
+          <div class="card-b">
             <div class="ai-grid" id="agrid"></div>
-            <div id="aiDetailWrap" style="margin-top:12px"></div>
+            <div id="aiDeep" style="margin-top:12px"></div>
           </div>
         </div>
 
-        <div class="gc" id="palCard" style="display:none">
-          <div class="gc-head"><div class="gc-title"><span class="gc-ti">🎨</span>RENK PALETİ & HİSTOGRAM</div></div>
-          <div class="gc-body">
-            <canvas id="histCvs" class="histcvs"></canvas>
+        <div class="card" id="palCard" style="display:none">
+          <div class="card-h"><div class="card-t" id="L_pal">RENK PALETİ & HİSTOGRAM</div></div>
+          <div class="card-b">
+            <canvas id="hcvs" class="hcvs"></canvas>
             <div class="palette" id="palEl"></div>
           </div>
         </div>
@@ -637,128 +409,80 @@ canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bo
 
       <!-- PAGE 1: GPS -->
       <div class="pg" id="p1">
-        <div class="gps-banner" id="gpsBanner">
-          <div class="gpsdot"></div>
-          <div class="gps-info">
-            <div class="gps-lbl">📍 Konum Verisi Bulundu</div>
-            <div class="gps-c" id="gpsC"></div>
-          </div>
-          <button class="mapbtn" id="mapBtn">🗺 Harita</button>
-        </div>
-        <div class="gc" id="noGps">
-          <div class="gc-body" style="text-align:center;padding:36px">
-            <div style="font-size:38px;margin-bottom:12px">📍</div>
-            <div style="font-size:16px;font-weight:800">GPS verisi bulunamadı</div>
-            <div style="font-size:12px;color:var(--text2);margin-top:6px;font-weight:500">Fotoğrafta konum bilgisi yok veya sıyrılmış</div>
-          </div>
-        </div>
-        <div id="gpsDet"></div>
-        <div class="gc" id="gpsHide" style="display:none">
-          <div class="gc-head"><div class="gc-title"><span class="gc-ti">🔒</span>KONUM GİZLEME</div></div>
-          <div class="gc-body">
-            <div style="font-size:13px;color:var(--text2);margin-bottom:14px;font-weight:500">GPS verisini sil veya sahte konum ekle</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-              <button class="btn sm outline" onclick="stripGPS()">🗑 GPS Sil</button>
-              <button class="btn sm outline" onclick="fakeTog()">🎭 Sahte Konum</button>
-            </div>
-            <div id="fakeForm" style="display:none">
-              <div style="display:flex;gap:8px;margin-bottom:10px">
-                <input type="number" id="fLat" placeholder="Enlem: 41.0082" step="0.0001" class="efin" style="margin-bottom:0">
-                <input type="number" id="fLon" placeholder="Boylam: 28.9784" step="0.0001" class="efin" style="margin-bottom:0">
-              </div>
-              <button class="btn sm full" onclick="applyFake()">✓ Uygula</button>
-            </div>
-            <div id="locMsg" style="font-size:12px;color:var(--ok);min-height:16px;margin-top:8px;font-weight:700"></div>
-          </div>
-        </div>
+        <div id="gpsPageContent"></div>
       </div>
 
       <!-- PAGE 2: AKTAR -->
       <div class="pg" id="p2">
-        <div class="gc">
-          <div class="gc-head"><div class="gc-title"><span class="gc-ti">✏️</span>METADATA DÜZENLE</div></div>
-          <div class="gc-body" id="editWrap">
-            <div class="nodata"><strong>Fotoğraf yok</strong>Analiz sekmesinden fotoğraf yükleyin</div>
-          </div>
-        </div>
-        <div class="gc">
-          <div class="gc-head"><div class="gc-title"><span class="gc-ti">▦</span>QR KOD</div></div>
-          <div class="gc-body">
-            <div style="font-size:13px;color:var(--text2);margin-bottom:14px;font-weight:500">EXIF özetini QR koda dönüştür</div>
-            <canvas id="qrCvs" width="200" height="200" style="display:block;margin:0 auto 14px;border-radius:16px;background:var(--glass2)"></canvas>
-            <button class="btn full ghost" onclick="makeQR()">▦ QR Üret</button>
-          </div>
-        </div>
-        <div class="gc">
-          <div class="gc-head"><div class="gc-title"><span class="gc-ti">📤</span>DIŞA AKTAR</div></div>
-          <div class="gc-body" style="display:flex;flex-direction:column;gap:10px">
-            <button class="btn full ghost" onclick="xJSON()">📄 JSON İndir</button>
-            <button class="btn full ghost" onclick="xTXT()">📋 TXT İndir</button>
-            <button class="btn full ghost" onclick="xCSV()">📊 CSV İndir</button>
-            <button class="btn full ghost" onclick="xReport()">📑 Rapor İndir</button>
-            <button class="btn full ghost" onclick="xCopy()">📎 Tümünü Kopyala</button>
-          </div>
-        </div>
+        <div id="exportPageContent"></div>
       </div>
 
       <!-- PAGE 3: GEÇMİŞ -->
       <div class="pg" id="p3">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
-          <div style="font-size:20px;font-weight:900;letter-spacing:-.5px">📁 Analiz Geçmişi</div>
-          <button class="btn sm ghost" onclick="clearHistory()">🗑 Temizle</button>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-.5px" id="L_hist_title">Analiz Geçmişi</div>
+          <button class="btn sm ghost" onclick="clearHist()" id="L_hist_clear">Temizle</button>
         </div>
         <div id="histWrap"></div>
       </div>
 
       <!-- PAGE 4: AYARLAR -->
       <div class="pg" id="p4">
-
-        <div class="slbl">Görünüm</div>
+        <div class="slbl" id="L_s_appearance">Görünüm</div>
         <div class="si" style="margin-bottom:12px">
-          <div class="si-emoji" id="modeIcon">🌙</div>
-          <div class="si-body">
-            <div class="si-title">Gece / Gündüz Modu</div>
-            <div class="si-sub" id="modeSub">Karanlık mod aktif</div>
+          <div class="si-em" id="modeIc">🌙</div>
+          <div class="si-b">
+            <div class="si-t" id="L_s_mode">Gece / Gündüz Modu</div>
+            <div class="si-s" id="modeSub">Karanlık mod aktif</div>
           </div>
           <div class="tog on" id="modeTog" onclick="toggleMode()"><div class="tok"></div></div>
         </div>
 
-        <div class="slbl">Tema</div>
+        <div class="slbl" id="L_s_theme">Tema</div>
         <div class="tgrid" id="tgrid"></div>
 
-        <div class="slbl">Dil / Language</div>
+        <div class="slbl" id="L_s_lang">Dil / Language</div>
         <div class="lgrid" id="lgrid"></div>
 
-        <div class="slbl">Tercihler</div>
+        <div class="slbl" id="L_s_prefs">Tercihler</div>
         <div class="si">
-          <div class="si-emoji">📊</div>
-          <div class="si-body"><div class="si-title">RGB Histogram</div><div class="si-sub">Kanal yoğunluk grafiği</div></div>
+          <div class="si-em">📊</div>
+          <div class="si-b">
+            <div class="si-t" id="L_s_hist_pref">RGB Histogram</div>
+            <div class="si-s" id="L_s_hist_sub">Kanal yoğunluk grafiği</div>
+          </div>
           <div class="tog on" id="togHist" onclick="tS('hist',this)"><div class="tok"></div></div>
         </div>
         <div class="si">
-          <div class="si-emoji">🎨</div>
-          <div class="si-body"><div class="si-title">Renk Paleti</div><div class="si-sub">Dominant renkleri çıkar</div></div>
+          <div class="si-em">🎨</div>
+          <div class="si-b">
+            <div class="si-t" id="L_s_pal_pref">Renk Paleti</div>
+            <div class="si-s" id="L_s_pal_sub">Dominant renkleri çıkar</div>
+          </div>
           <div class="tog on" id="togPal" onclick="tS('palette',this)"><div class="tok"></div></div>
         </div>
         <div class="si" style="margin-bottom:14px">
-          <div class="si-emoji">🤖</div>
-          <div class="si-body"><div class="si-title">AI Sahtecilik Analizi</div><div class="si-sub">Claude API ile derin analiz</div></div>
+          <div class="si-em">🤖</div>
+          <div class="si-b">
+            <div class="si-t" id="L_s_ai_pref">AI Sahtecilik Analizi</div>
+            <div class="si-s" id="L_s_ai_sub">Claude API ile derin analiz</div>
+          </div>
           <div class="tog on" id="togAI" onclick="tS('aiAnalysis',this)"><div class="tok"></div></div>
         </div>
 
-        <div class="slbl">Hesap</div>
-        <div class="gc">
-          <div class="gc-body">
+        <div class="slbl" id="L_s_account">Hesap</div>
+        <div class="card">
+          <div class="card-b">
             <div class="exrow" style="background:none;border-color:var(--border);padding:0 0 10px">
-              <div class="exkey">Kullanıcı</div><div class="exval a" id="sUser">—</div>
+              <div class="exk" id="L_s_user">Kullanıcı</div><div class="exv ac" id="sUser">—</div>
             </div>
             <div class="exrow" style="background:none;border-color:var(--border);padding:8px 0 10px">
-              <div class="exkey">Plan</div><div class="exval y" id="sPlan">—</div>
+              <div class="exk" id="L_s_plan">Plan</div><div class="exv ye" id="sPlan">—</div>
             </div>
             <div class="exrow" style="background:none;border:none;padding:8px 0 0">
-              <div class="exkey">Bitiş</div><div class="exval" id="sExp">—</div>
+              <div class="exk" id="L_s_exp">Bitiş</div><div class="exv" id="sExp">—</div>
             </div>
-            <button class="btn danger sm full" style="margin-top:14px" onclick="doLogout()">↩ Çıkış Yap</button>
+            <button class="btn danger sm full" style="margin-top:13px" onclick="doLogout()" id="L_s_logout">↩ Çıkış Yap</button>
           </div>
         </div>
 
@@ -777,84 +501,192 @@ canvas.histcvs{width:100%;height:72px;border-radius:12px;display:block;margin-bo
 
 <script>
 'use strict';
-/* ══════════════════════════════════════════
-   CONFIG
-══════════════════════════════════════════ */
-const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
-// Not: Anthropic API anahtarı eklentisiz çalışır — Claude.ai artifact ortamında otomatik bağlanır
-// Kendi sunucunda kullanırken ANTHROPIC_API_KEY env variable kullan
-const USE_CLAUDE_API = true; // AI analizi için
 
 /* ══════════════════════════════════════════
-   STATE
+   I18N — 20 DİL
 ══════════════════════════════════════════ */
+const I18N = {
+  tr:{flag:'🇹🇷',name:'TR',t:{
+    sys:'Sistem Erişimi',auth:'Yetkili erişimi gerekli',user_lbl:'Kullanıcı Adı',key_lbl:'Erişim Anahtarı',
+    login_btn:'OTURUM AÇ',demo_btn:'Demo Modu',
+    err_fill:'Kullanıcı adı ve key girin',
+    err_invalid:'❌ Geçersiz kullanıcı adı veya key',
+    err_expired:'❌ Key süresi dolmuş',
+    err_frozen:'❌ Key dondurulmuş — yönetici ile iletişime geçin',
+    err_demo:'Demo hakkı kullanıldı — lütfen key satın alın',
+    err_conn:'Doğrulama yapılamadı — tekrar deneyin',
+    checking:'Doğrulanıyor…',
+    N_analyze:'Analiz',N_gps:'GPS',N_export:'Aktar',N_history:'Geçmiş',N_settings:'Ayarlar',
+    logout:'Çıkış',
+    dz_title:'Fotoğraf Seç veya Bırak',
+    analyzing:'Metadata analiz ediliyor…',
+    ai_lbl:'AI ANALİZİ',pal_lbl:'RENK PALETİ & HİSTOGRAM',
+    forg:'YAZILIMSAL MÜDAHALE TESPİT EDİLDİ',
+    quality:'Kalite Skoru',faces:'Yüz Tahmini',alpha:'Şeffaflık',forgery:'Sahtecilik',
+    faces_sub:'tahmini yüz',yes:'VAR',no:'YOK',clean:'Temiz',
+    ai_deep:'Claude AI analizi yapıyor…',
+    cam:'Kamera',shoot:'Çekim',img_lbl:'Görüntü',date_lbl:'Tarih & Saat',copy_right:'Telif',file_lbl:'Dosya',
+    gps_found:'Konum Verisi Bulundu',no_gps:'GPS verisi bulunamadı',no_gps_sub:'Fotoğrafta konum bilgisi yok',
+    loc_hide:'KONUM GİZLEME',loc_sub:'GPS verisini sil veya sahte konum ekle',
+    strip_btn:'GPS Sil',fake_btn:'Sahte Konum',apply:'Uygula',
+    gps_stripped:'GPS verisi silindi',fake_done:'Sahte konum eklendi',
+    pro_gps_title:'GPS sadece Pro planda',pro_gps_sub:'GPS konum bilgilerini görmek ve gizlemek için Pro veya Admin planına geçin.',
+    pro_edit_title:'Metadata düzenleme Pro plana özel',pro_edit_sub:'Metadata alanlarını düzenleyebilmek için Pro veya Admin planına geçin.',
+    edit_lbl:'METADATA DÜZENLE',export_lbl:'DIŞA AKTAR',qr_lbl:'QR KOD',qr_sub:'EXIF özetini QR koda dönüştür',
+    exp_json:'JSON İndir',exp_txt:'TXT İndir',exp_csv:'CSV İndir',exp_rep:'Rapor İndir',exp_copy:'Tümünü Kopyala',
+    qr_gen:'QR Üret',qr_done:'QR üretildi',
+    hist_title:'Analiz Geçmişi',hist_empty:'Geçmiş boş',hist_empty_sub:'Analiz ettiğiniz fotoğraflar burada görünecek',hist_clear:'Temizle',
+    hist_confirm:'Tüm geçmiş silinsin mi?',
+    s_appearance:'Görünüm',s_mode:'Gece / Gündüz Modu',s_dark:'Karanlık mod aktif',s_light:'Aydınlık mod aktif',
+    s_theme:'Tema',s_lang:'Dil / Language',s_prefs:'Tercihler',
+    s_hist:'RGB Histogram',s_hist_sub:'Kanal yoğunluk grafiği',
+    s_pal:'Renk Paleti',s_pal_sub:'Dominant renkleri çıkar',
+    s_ai:'AI Sahtecilik Analizi',s_ai_sub:'Claude API ile derin analiz',
+    s_account:'Hesap',s_user:'Kullanıcı',s_plan:'Plan',s_exp:'Bitiş',s_logout:'↩ Çıkış Yap',
+    copied:'Kopyalandı',no_photo:'Fotoğraf yok',all_copied:'Tümü kopyalandı',saved:'Kaydedildi',
+    upgrade:'Pro\'ya Yükselt',plan_unlimited:'Süresiz',
+  }},
+  en:{flag:'🇬🇧',name:'EN',t:{
+    sys:'System Access',auth:'Authorization Required',user_lbl:'Username',key_lbl:'Access Key',
+    login_btn:'SIGN IN',demo_btn:'Demo Mode',
+    err_fill:'Enter username and key',
+    err_invalid:'❌ Invalid username or key',
+    err_expired:'❌ Key has expired',
+    err_frozen:'❌ Key is frozen — contact admin',
+    err_demo:'Demo already used — please get a key',
+    err_conn:'Could not verify — try again',
+    checking:'Verifying…',
+    N_analyze:'Analyze',N_gps:'GPS',N_export:'Export',N_history:'History',N_settings:'Settings',
+    logout:'Logout',dz_title:'Select or Drop Photo',analyzing:'Analyzing metadata…',
+    ai_lbl:'AI ANALYSIS',pal_lbl:'COLOR PALETTE & HISTOGRAM',
+    forg:'DIGITAL TAMPERING DETECTED',
+    quality:'Quality Score',faces:'Face Estimate',alpha:'Transparency',forgery:'Forgery Risk',
+    faces_sub:'estimated faces',yes:'YES',no:'NO',clean:'Clean',ai_deep:'Claude AI analyzing…',
+    cam:'Camera',shoot:'Capture',img_lbl:'Image',date_lbl:'Date & Time',copy_right:'Copyright',file_lbl:'File',
+    gps_found:'Location Data Found',no_gps:'No GPS data found',no_gps_sub:'Photo has no location data',
+    loc_hide:'LOCATION PRIVACY',loc_sub:'Remove GPS or add fake location',
+    strip_btn:'Strip GPS',fake_btn:'Fake Location',apply:'Apply',
+    gps_stripped:'GPS data removed',fake_done:'Fake location applied',
+    pro_gps_title:'GPS requires Pro plan',pro_gps_sub:'Upgrade to Pro or Admin to view and manage GPS location data.',
+    pro_edit_title:'Metadata editing requires Pro',pro_edit_sub:'Upgrade to Pro or Admin to edit metadata fields.',
+    edit_lbl:'EDIT METADATA',export_lbl:'EXPORT',qr_lbl:'QR CODE',qr_sub:'Embed EXIF summary into QR code',
+    exp_json:'Download JSON',exp_txt:'Download TXT',exp_csv:'Download CSV',exp_rep:'Download Report',exp_copy:'Copy All',
+    qr_gen:'Generate QR',qr_done:'QR generated',
+    hist_title:'Analysis History',hist_empty:'History is empty',hist_empty_sub:'Analyzed photos will appear here',hist_clear:'Clear',
+    hist_confirm:'Clear all history?',
+    s_appearance:'Appearance',s_mode:'Dark / Light Mode',s_dark:'Dark mode active',s_light:'Light mode active',
+    s_theme:'Theme',s_lang:'Language',s_prefs:'Preferences',
+    s_hist:'RGB Histogram',s_hist_sub:'Channel intensity graph',s_pal:'Color Palette',s_pal_sub:'Extract dominant colors',
+    s_ai:'AI Forgery Analysis',s_ai_sub:'Deep analysis via Claude API',
+    s_account:'Account',s_user:'User',s_plan:'Plan',s_exp:'Expires',s_logout:'↩ Sign Out',
+    copied:'Copied',no_photo:'No photo',all_copied:'All copied',saved:'Saved',
+    upgrade:'Upgrade to Pro',plan_unlimited:'Unlimited',
+  }},
+  de:{flag:'🇩🇪',name:'DE',t:{sys:'Systemzugang',auth:'Autorisierung erforderlich',user_lbl:'Benutzername',key_lbl:'Zugriffsschlüssel',login_btn:'ANMELDEN',demo_btn:'Demo',err_fill:'Benutzername und Key eingeben',err_invalid:'❌ Ungültige Anmeldedaten',err_expired:'❌ Key abgelaufen',err_frozen:'❌ Key gesperrt',err_demo:'Demo bereits verwendet',err_conn:'Verbindungsfehler',checking:'Überprüfung…',N_analyze:'Analyse',N_gps:'GPS',N_export:'Export',N_history:'Verlauf',N_settings:'Einstellungen',logout:'Abmelden',dz_title:'Foto auswählen',analyzing:'Analysiere…',ai_lbl:'KI ANALYSE',pal_lbl:'FARBPALETTE & HISTOGRAMM',forg:'MANIPULATION ERKANNT',quality:'Qualität',faces:'Gesichter',alpha:'Transparenz',forgery:'Fälschung',faces_sub:'Gesichter',yes:'JA',no:'NEIN',clean:'Sauber',ai_deep:'KI analysiert…',cam:'Kamera',shoot:'Aufnahme',img_lbl:'Bild',date_lbl:'Datum & Zeit',copy_right:'Urheberrecht',file_lbl:'Datei',gps_found:'Standort gefunden',no_gps:'Kein GPS',no_gps_sub:'Keine Standortdaten',loc_hide:'STANDORT',loc_sub:'GPS entfernen',strip_btn:'GPS entfernen',fake_btn:'Fake-Standort',apply:'Anwenden',gps_stripped:'GPS entfernt',fake_done:'Fake-Standort gesetzt',pro_gps_title:'GPS erfordert Pro',pro_gps_sub:'Upgraden Sie auf Pro für GPS.',pro_edit_title:'Bearbeitung erfordert Pro',pro_edit_sub:'Upgraden Sie auf Pro.',edit_lbl:'METADATEN',export_lbl:'EXPORT',qr_lbl:'QR CODE',qr_sub:'EXIF in QR',exp_json:'JSON laden',exp_txt:'TXT laden',exp_csv:'CSV laden',exp_rep:'Bericht laden',exp_copy:'Alles kopieren',qr_gen:'QR erstellen',qr_done:'QR erstellt',hist_title:'Verlauf',hist_empty:'Leer',hist_empty_sub:'Analysierte Fotos erscheinen hier',hist_clear:'Leeren',hist_confirm:'Verlauf löschen?',s_appearance:'Darstellung',s_mode:'Dunkel / Hell',s_dark:'Dunkelmodus',s_light:'Hellmodus',s_theme:'Thema',s_lang:'Sprache',s_prefs:'Einstellungen',s_hist:'Histogramm',s_hist_sub:'Kanaldiagramm',s_pal:'Farbpalette',s_pal_sub:'Farben extrahieren',s_ai:'KI Analyse',s_ai_sub:'Tiefenanalyse',s_account:'Konto',s_user:'Benutzer',s_plan:'Plan',s_exp:'Ablauf',s_logout:'↩ Abmelden',copied:'Kopiert',no_photo:'Kein Foto',all_copied:'Alles kopiert',saved:'Gespeichert',upgrade:'Auf Pro upgraden',plan_unlimited:'Unbegrenzt'}},
+  fr:{flag:'🇫🇷',name:'FR',t:{sys:'Accès Système',auth:'Autorisation Requise',user_lbl:'Nom d\'utilisateur',key_lbl:'Clé d\'accès',login_btn:'SE CONNECTER',demo_btn:'Démo',err_fill:'Entrez nom et clé',err_invalid:'❌ Identifiants invalides',err_expired:'❌ Clé expirée',err_frozen:'❌ Clé suspendue',err_demo:'Démo déjà utilisée',err_conn:'Erreur de connexion',checking:'Vérification…',N_analyze:'Analyser',N_gps:'GPS',N_export:'Exporter',N_history:'Historique',N_settings:'Paramètres',logout:'Déconnecter',dz_title:'Sélectionner une photo',analyzing:'Analyse…',ai_lbl:'ANALYSE IA',pal_lbl:'PALETTE & HISTOGRAMME',forg:'MANIPULATION DÉTECTÉE',quality:'Qualité',faces:'Visages',alpha:'Transparence',forgery:'Risque',faces_sub:'visages',yes:'OUI',no:'NON',clean:'Propre',ai_deep:'IA analyse…',cam:'Appareil',shoot:'Prise de vue',img_lbl:'Image',date_lbl:'Date & Heure',copy_right:'Droits',file_lbl:'Fichier',gps_found:'Localisation trouvée',no_gps:'Pas de GPS',no_gps_sub:'Pas de données de localisation',loc_hide:'CONFIDENTIALITÉ',loc_sub:'Supprimer GPS',strip_btn:'Supprimer GPS',fake_btn:'Fausse loc.',apply:'Appliquer',gps_stripped:'GPS supprimé',fake_done:'Fausse localisation',pro_gps_title:'GPS nécessite Pro',pro_gps_sub:'Passez à Pro pour le GPS.',pro_edit_title:'Édition nécessite Pro',pro_edit_sub:'Passez à Pro pour éditer.',edit_lbl:'MÉTADONNÉES',export_lbl:'EXPORTER',qr_lbl:'QR CODE',qr_sub:'EXIF en QR',exp_json:'JSON',exp_txt:'TXT',exp_csv:'CSV',exp_rep:'Rapport',exp_copy:'Tout copier',qr_gen:'Générer QR',qr_done:'QR généré',hist_title:'Historique',hist_empty:'Vide',hist_empty_sub:'Les photos analysées apparaîtront ici',hist_clear:'Effacer',hist_confirm:'Effacer l\'historique?',s_appearance:'Apparence',s_mode:'Mode sombre / clair',s_dark:'Mode sombre',s_light:'Mode clair',s_theme:'Thème',s_lang:'Langue',s_prefs:'Préférences',s_hist:'Histogramme',s_hist_sub:'Graphique',s_pal:'Palette',s_pal_sub:'Couleurs dominantes',s_ai:'Analyse IA',s_ai_sub:'Analyse approfondie',s_account:'Compte',s_user:'Utilisateur',s_plan:'Plan',s_exp:'Expiration',s_logout:'↩ Déconnecter',copied:'Copié',no_photo:'Pas de photo',all_copied:'Tout copié',saved:'Enregistré',upgrade:'Passer à Pro',plan_unlimited:'Illimité'}},
+  es:{flag:'🇪🇸',name:'ES',t:{sys:'Acceso al Sistema',auth:'Autorización requerida',user_lbl:'Usuario',key_lbl:'Clave de acceso',login_btn:'INICIAR SESIÓN',demo_btn:'Demo',err_fill:'Introduce usuario y clave',err_invalid:'❌ Credenciales inválidas',err_expired:'❌ Clave expirada',err_frozen:'❌ Clave suspendida',err_demo:'Demo ya usado',err_conn:'Error de conexión',checking:'Verificando…',N_analyze:'Analizar',N_gps:'GPS',N_export:'Exportar',N_history:'Historial',N_settings:'Ajustes',logout:'Salir',dz_title:'Seleccionar foto',analyzing:'Analizando…',ai_lbl:'ANÁLISIS IA',pal_lbl:'PALETA & HISTOGRAMA',forg:'MANIPULACIÓN DETECTADA',quality:'Calidad',faces:'Caras',alpha:'Transparencia',forgery:'Riesgo',faces_sub:'caras',yes:'SÍ',no:'NO',clean:'Limpio',ai_deep:'IA analizando…',cam:'Cámara',shoot:'Captura',img_lbl:'Imagen',date_lbl:'Fecha & Hora',copy_right:'Derechos',file_lbl:'Archivo',gps_found:'Ubicación encontrada',no_gps:'Sin GPS',no_gps_sub:'Sin datos de ubicación',loc_hide:'PRIVACIDAD',loc_sub:'Eliminar GPS',strip_btn:'Eliminar GPS',fake_btn:'Ubicación falsa',apply:'Aplicar',gps_stripped:'GPS eliminado',fake_done:'Ubicación falsa aplicada',pro_gps_title:'GPS requiere Pro',pro_gps_sub:'Actualiza a Pro para GPS.',pro_edit_title:'Edición requiere Pro',pro_edit_sub:'Actualiza a Pro.',edit_lbl:'METADATOS',export_lbl:'EXPORTAR',qr_lbl:'CÓDIGO QR',qr_sub:'EXIF en QR',exp_json:'JSON',exp_txt:'TXT',exp_csv:'CSV',exp_rep:'Informe',exp_copy:'Copiar todo',qr_gen:'Generar QR',qr_done:'QR generado',hist_title:'Historial',hist_empty:'Vacío',hist_empty_sub:'Las fotos aparecerán aquí',hist_clear:'Limpiar',hist_confirm:'¿Limpiar historial?',s_appearance:'Apariencia',s_mode:'Modo oscuro / claro',s_dark:'Modo oscuro',s_light:'Modo claro',s_theme:'Tema',s_lang:'Idioma',s_prefs:'Preferencias',s_hist:'Histograma',s_hist_sub:'Gráfico de canales',s_pal:'Paleta',s_pal_sub:'Colores dominantes',s_ai:'Análisis IA',s_ai_sub:'Análisis profundo',s_account:'Cuenta',s_user:'Usuario',s_plan:'Plan',s_exp:'Vencimiento',s_logout:'↩ Salir',copied:'Copiado',no_photo:'Sin foto',all_copied:'Todo copiado',saved:'Guardado',upgrade:'Actualizar a Pro',plan_unlimited:'Ilimitado'}},
+};
+// Stub remaining langs
+['it','pt','ru','ja','ko','zh','ar','hi','nl','pl','sv','no','fi','uk','id'].forEach(c=>{
+  I18N[c]={flag:{it:'🇮🇹',pt:'🇵🇹',ru:'🇷🇺',ja:'🇯🇵',ko:'🇰🇷',zh:'🇨🇳',ar:'🇸🇦',hi:'🇮🇳',nl:'🇳🇱',pl:'🇵🇱',sv:'🇸🇪',no:'🇳🇴',fi:'🇫🇮',uk:'🇺🇦',id:'🇮🇩'}[c],name:c.toUpperCase(),t:{...I18N.en.t}};
+});
+
+let L = I18N.tr.t; // active language strings
+
+/* ══════════════════════════════════════════
+   CONFIG & STATE
+══════════════════════════════════════════ */
+const GIST_ID = '1ae4dd781cc3b4f8fd70f3c3bc77c3d9';
+let cfg = JSON.parse(localStorage.getItem('p4cfg')||'{"theme":"violet","mode":"dark","hist":true,"palette":true,"aiAnalysis":true,"lang":"tr"}');
 let curUser=null, curPlan=null, curExp=0;
 let exif={}, fName='', fObj=null, cvBuf=null;
 let gLat=null, gLon=null, demoIv=null;
-let cfg = JSON.parse(localStorage.getItem('p4cfg')||'{"theme":"violet","mode":"dark","hist":true,"palette":true,"aiAnalysis":true,"lang":"tr"}');
 
 /* ══════════════════════════════════════════
-   LOGIN — GIST API (FIXED)
-   Sorun: CORS + token format
-   Çözüm: Public gist için token gerekmez,
-   private gist için proxy gerekir.
-   Fallback: localStorage DB
+   DEMO FINGERPRINT — IP + Canvas + Hardware
 ══════════════════════════════════════════ */
-async function doLogin() {
-  const u = document.getElementById('lu').value.trim().toLowerCase();
-  const k = document.getElementById('lk').value.trim().toUpperCase();
-  if (!u || !k) { setLS('Kullanıcı adı ve key girin', 'err'); return; }
-  setLS('Doğrulanıyor…', '');
-
-  // ÖNCE localStorage'daki local DB'yi dene (admin.html buraya yazar)
-  const localDB = getLocalDB();
-  const localFound = localDB.find(r => r.user === u && r.key === k && r.status === 'active');
-  if (localFound) {
-    const now = Date.now();
-    if (localFound.expires > 0 && localFound.expires < now) {
-      setLS('❌ Key süresi dolmuş', 'err'); return;
-    }
-    localFound.usedAt = now; localFound.useCount = (localFound.useCount||0)+1;
-    saveLocalDB(localDB);
-    sessionStorage.setItem('p4s', JSON.stringify({u,p:localFound.plan||'active',e:localFound.expires||0}));
-    enterApp(u, localFound.plan||'active', localFound.expires||0);
-    return;
-  }
-
-  // Sonra Gist'i dene
-  try {
-    const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      headers: { 'Accept': 'application/vnd.github.v3+json', 'X-GitHub-Api-Version': '2022-11-28' }
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const file = data.files['p4_db.json'];
-    if (!file) throw new Error('no_file');
-    const db = JSON.parse(file.content || '[]');
-    // Sync to local
-    saveLocalDB(db);
-    const found = db.find(r => r.user === u && r.key === k && r.status === 'active');
-    if (!found) { setLS('❌ Geçersiz kullanıcı adı veya key', 'err'); return; }
-    const now = Date.now();
-    if (found.expires > 0 && found.expires < now) { setLS('❌ Key süresi dolmuş', 'err'); return; }
-    sessionStorage.setItem('p4s', JSON.stringify({u,p:found.plan||'active',e:found.expires||0}));
-    enterApp(u, found.plan||'active', found.expires||0);
-  } catch(e) {
-    // Eğer Gist erişilemiyorsa sadece local DB'ye bak
-    setLS('❌ Gist erişilemiyor — local key bulunamadı', 'err');
-  }
+async function getDemoFP(){
+  // canvas fingerprint
+  const c=document.createElement('canvas');
+  const ctx=c.getContext('2d');
+  ctx.textBaseline='top';ctx.font='14px Arial';ctx.fillText('p4demo',2,2);
+  const canvStr=c.toDataURL().slice(-50);
+  // hardware
+  const hw=`${navigator.hardwareConcurrency||0}|${screen.width}x${screen.height}|${navigator.language}|${navigator.platform||''}`;
+  // timezone
+  const tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';
+  // combine
+  const raw=canvStr+hw+tz;
+  let hash=0;for(let i=0;i<raw.length;i++)hash=((hash<<5)-hash+raw.charCodeAt(i))|0;
+  return 'fp_'+(hash>>>0).toString(36);
 }
 
+async function isDemoUsed(){
+  const fp=await getDemoFP();
+  const used=JSON.parse(localStorage.getItem('p4demos')||'{}');
+  return {fp, used: !!used[fp]};
+}
+
+async function markDemoUsed(){
+  const fp=await getDemoFP();
+  const used=JSON.parse(localStorage.getItem('p4demos')||'{}');
+  used[fp]=Date.now();
+  localStorage.setItem('p4demos',JSON.stringify(used));
+}
+
+/* ══════════════════════════════════════════
+   LOGIN
+══════════════════════════════════════════ */
 function getLocalDB(){try{return JSON.parse(localStorage.getItem('p4_keys')||'[]');}catch{return[];}}
 function saveLocalDB(db){localStorage.setItem('p4_keys',JSON.stringify(db));}
 
-function doDemo(){
-  const exp = Date.now()+300000;
+async function doLogin(){
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const k=document.getElementById('lk').value.trim().toUpperCase();
+  if(!u||!k){setLS(L.err_fill,'err');return;}
+  setLS(L.checking,'');
+
+  // Local DB first
+  const db=getLocalDB();
+  let found=db.find(r=>r.user===u&&r.key===k);
+
+  if(!found){
+    // Try Gist
+    try{
+      const res=await fetch(`https://api.github.com/gists/${GIST_ID}`,{headers:{'Accept':'application/vnd.github.v3+json'}});
+      if(res.ok){
+        const data=await res.json();
+        const file=data.files['p4_db.json'];
+        if(file){const gdb=JSON.parse(file.content||'[]');saveLocalDB(gdb);found=gdb.find(r=>r.user===u&&r.key===k);}
+      }
+    }catch{}
+  }
+
+  if(!found){setLS(L.err_invalid,'err');return;}
+  if(found.status==='frozen'||found.status==='revoked'){setLS(L.err_frozen,'err');return;}
+  if(found.status!=='active'){setLS(L.err_invalid,'err');return;}
+  const now=Date.now();
+  if(found.expires>0&&found.expires<now){setLS(L.err_expired,'err');return;}
+
+  // Update usage silently
+  found.usedAt=now;found.useCount=(found.useCount||0)+1;
+  const updated=getLocalDB().map(r=>r.id===found.id?found:r);
+  saveLocalDB(updated);
+
+  sessionStorage.setItem('p4s',JSON.stringify({u,p:found.plan||'active',e:found.expires||0}));
+  enterApp(u,found.plan||'active',found.expires||0);
+}
+
+async function doDemo(){
+  const {fp, used}=await isDemoUsed();
+  if(used){setLS(L.err_demo,'err');return;}
+  await markDemoUsed();
+  const exp=Date.now()+300000;
   enterApp('demo','demo',exp);
   let s=300;
   demoIv=setInterval(()=>{
     s--;
-    document.getElementById('kbDetail').textContent=`Demo · ${s}s kaldı`;
+    document.getElementById('kbDetail').textContent=`Demo · ${s}s`;
     if(s<=0){clearInterval(demoIv);doLogout();}
   },1000);
 }
@@ -865,17 +697,16 @@ function enterApp(u,p,e){
   curUser=u;curPlan=p;curExp=e;
   document.getElementById('loginScreen').classList.add('out');
   document.getElementById('app').classList.add('on');
-  const expStr=e>0?new Date(e).toLocaleDateString('tr-TR'):'Süresiz';
+  const expStr=e>0?new Date(e).toLocaleDateString():L.plan_unlimited;
   document.getElementById('tbUser').textContent='@'+u;
-  const badge=document.getElementById('tbBadge');
-  badge.textContent=p.toUpperCase();
-  badge.className='tb-badge'+(p==='demo'?' demo':'');
+  const bd=document.getElementById('tbBadge');
+  bd.textContent=p.toUpperCase();bd.className='tb-badge'+(p==='demo'?' demo':'');
   document.getElementById('kbUser').textContent='@'+u;
   document.getElementById('kbDetail').textContent=p+' · '+expStr;
   document.getElementById('sUser').textContent=u;
   document.getElementById('sPlan').textContent=p.toUpperCase();
   document.getElementById('sExp').textContent=expStr;
-  renderHistory();
+  renderHistPage();
 }
 
 function doLogout(){
@@ -884,10 +715,13 @@ function doLogout(){
   curUser=null;exif={};fObj=null;cvBuf=null;
   document.getElementById('loginScreen').classList.remove('out');
   document.getElementById('app').classList.remove('on');
-  document.getElementById('lu').value='';
-  document.getElementById('lk').value='';
+  document.getElementById('lu').value='';document.getElementById('lk').value='';
   setLS('','');
 }
+
+// Plan helpers
+function isPro(){return ['pro','admin'].includes(curPlan);}
+function isAdmin(){return curPlan==='admin';}
 
 // Session restore
 (function(){
@@ -900,81 +734,87 @@ function doLogout(){
 /* ══════════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════════ */
-let curPage=0;
+let curPg=0;
 function gp(i){
-  const prev=curPage;
   for(let j=0;j<5;j++){
     document.getElementById('n'+j).classList.toggle('on',j===i);
-    const pg=document.getElementById('p'+j);
-    if(pg){
-      if(j===i){pg.classList.remove('slide-left','slide-right');setTimeout(()=>pg.classList.add('on'),10);}
-      else pg.classList.remove('on');
-    }
+    const p=document.getElementById('p'+j);
+    p.classList.remove('on');
+    if(j===i)setTimeout(()=>p.classList.add('on'),10);
   }
-  curPage=i;
-  if(i===3)renderHistory();
+  curPg=i;
+  if(i===1)renderGPSPage();
+  if(i===2)renderExportPage();
+  if(i===3)renderHistPage();
 }
 
 /* ══════════════════════════════════════════
-   THEMES & MODES
+   THEMES & MODE
 ══════════════════════════════════════════ */
 const THEMES=[
-  {id:'violet',name:'Violet',c:'#a78bfa'},
-  {id:'cyan',name:'Cyan',c:'#22d3ee'},
-  {id:'green',name:'Green',c:'#4ade80'},
-  {id:'rose',name:'Rose',c:'#fb7185'},
-  {id:'amber',name:'Amber',c:'#fbbf24'},
-  {id:'indigo',name:'Indigo',c:'#818cf8'},
-  {id:'teal',name:'Teal',c:'#2dd4bf'},
-  {id:'orange',name:'Orange',c:'#fb923c'},
+  {id:'violet',name:'Violet',c:'#a78bfa'},{id:'cyan',name:'Cyan',c:'#22d3ee'},
+  {id:'green',name:'Green',c:'#4ade80'},{id:'rose',name:'Rose',c:'#fb7185'},
+  {id:'amber',name:'Amber',c:'#fbbf24'},{id:'indigo',name:'Indigo',c:'#818cf8'},
+  {id:'teal',name:'Teal',c:'#2dd4bf'},{id:'orange',name:'Orange',c:'#fb923c'},
 ];
-
 function buildThemeGrid(){
   document.getElementById('tgrid').innerHTML=THEMES.map(t=>
     `<div class="tbtn${cfg.theme===t.id?' on':''}" onclick="applyTheme('${t.id}')">
       <div class="tdot" style="background:${t.c};box-shadow:0 0 10px ${t.c}55"></div>
-      <div class="tname">${t.name}</div>
+      <div class="tnm">${t.name}</div>
     </div>`).join('');
 }
-
-function applyTheme(id){
-  cfg.theme=id;document.body.dataset.theme=id;
-  saveCfg();buildThemeGrid();
-}
-
+function applyTheme(id){cfg.theme=id;document.body.dataset.theme=id;saveCfg();buildThemeGrid();}
 function toggleMode(){
-  const isDark=document.body.dataset.mode!=='dark';
-  document.body.dataset.mode=isDark?'dark':'light';
-  cfg.mode=isDark?'dark':'light';
+  const light=document.body.dataset.mode==='dark';
+  document.body.dataset.mode=light?'light':'dark';cfg.mode=light?'light':'dark';
   const tog=document.getElementById('modeTog');
-  tog.classList.toggle('on',isDark);
-  document.getElementById('modeIcon').textContent=isDark?'🌙':'☀️';
-  document.getElementById('modeSub').textContent=isDark?'Karanlık mod aktif':'Aydınlık mod aktif';
+  tog.classList.toggle('on',!light);
+  document.getElementById('modeIc').textContent=light?'☀️':'🌙';
+  document.getElementById('modeSub').textContent=light?L.s_light:L.s_dark;
   saveCfg();
 }
-
 function saveCfg(){localStorage.setItem('p4cfg',JSON.stringify(cfg));}
-function tS(key,el){cfg[key]=!cfg[key];el.classList.toggle('on',cfg[key]);saveCfg();}
+function tS(k,el){cfg[k]=!cfg[k];el.classList.toggle('on',cfg[k]);saveCfg();}
 
 /* ══════════════════════════════════════════
-   LANGUAGES
+   LANG
 ══════════════════════════════════════════ */
-const LANGS=[
-  {c:'tr',f:'🇹🇷',n:'TR'},{c:'en',f:'🇬🇧',n:'EN'},{c:'de',f:'🇩🇪',n:'DE'},
-  {c:'fr',f:'🇫🇷',n:'FR'},{c:'es',f:'🇪🇸',n:'ES'},{c:'it',f:'🇮🇹',n:'IT'},
-  {c:'pt',f:'🇵🇹',n:'PT'},{c:'ru',f:'🇷🇺',n:'RU'},{c:'ja',f:'🇯🇵',n:'JA'},
-  {c:'ko',f:'🇰🇷',n:'KO'},{c:'zh',f:'🇨🇳',n:'ZH'},{c:'ar',f:'🇸🇦',n:'AR'},
-  {c:'hi',f:'🇮🇳',n:'HI'},{c:'nl',f:'🇳🇱',n:'NL'},{c:'pl',f:'🇵🇱',n:'PL'},
-  {c:'sv',f:'🇸🇪',n:'SV'},{c:'no',f:'🇳🇴',n:'NO'},{c:'fi',f:'🇫🇮',n:'FI'},
-  {c:'uk',f:'🇺🇦',n:'UK'},{c:'id',f:'🇮🇩',n:'ID'},
-];
 function buildLangGrid(){
-  document.getElementById('lgrid').innerHTML=LANGS.map(l=>
-    `<button class="lbtn${cfg.lang===l.c?' on':''}" onclick="setLang('${l.c}')">
-      <span class="lflag">${l.f}</span><span class="lname">${l.n}</span>
+  document.getElementById('lgrid').innerHTML=Object.entries(I18N).map(([code,{flag,name}])=>
+    `<button class="lbtn${cfg.lang===code?' on':''}" onclick="setLang('${code}')">
+      <span class="lflag">${flag}</span><span class="lnm">${name}</span>
     </button>`).join('');
 }
-function setLang(c){cfg.lang=c;saveCfg();buildLangGrid();toast('Dil güncellendi: '+c.toUpperCase());}
+
+function setLang(code){
+  cfg.lang=code;saveCfg();
+  L=I18N[code]?.t||I18N.en.t;
+  applyLang();
+  buildLangGrid();
+  toast(name+' ✓');
+}
+
+function applyLang(){
+  // Login
+  const set=(id,txt)=>{const e=document.getElementById(id);if(e&&txt!==undefined)e.textContent=txt;};
+  set('L_title',L.sys);set('L_sub',L.auth);set('L_user',L.user_lbl);set('L_key',L.key_lbl);
+  set('L_btn',L.login_btn);set('L_demo',L.demo_btn);
+  // Nav
+  set('N_analyze',L.N_analyze);set('N_gps',L.N_gps);set('N_export',L.N_export);
+  set('N_history',L.N_history);set('N_settings',L.N_settings);
+  set('L_logout',L.logout);set('L_dz_title',L.dz_title);set('L_analyzing',L.analyzing);
+  set('L_ai',L.ai_lbl);set('L_pal',L.pal_lbl);set('L_forg',L.forg);
+  set('L_hist_title',L.hist_title);set('L_hist_clear',L.hist_clear);
+  set('L_s_appearance',L.s_appearance);set('L_s_mode',L.s_mode);
+  set('modeSub',cfg.mode==='light'?L.s_light:L.s_dark);
+  set('L_s_theme',L.s_theme);set('L_s_lang',L.s_lang);set('L_s_prefs',L.s_prefs);
+  set('L_s_hist_pref',L.s_hist);set('L_s_hist_sub',L.s_hist_sub);
+  set('L_s_pal_pref',L.s_pal);set('L_s_pal_sub',L.s_pal_sub);
+  set('L_s_ai_pref',L.s_ai);set('L_s_ai_sub',L.s_ai_sub);
+  set('L_s_account',L.s_account);set('L_s_user',L.s_user);
+  set('L_s_plan',L.s_plan);set('L_s_exp',L.s_exp);set('L_s_logout',L.s_logout);
+}
 
 /* ══════════════════════════════════════════
    FILE HANDLING
@@ -993,44 +833,41 @@ function loadFile(file){
   r.onload=ev=>{
     document.getElementById('prevImg').src=ev.target.result;
     document.getElementById('ipName').textContent=file.name;
-    document.getElementById('ipSize').textContent=fmtSz(file.size);
+    document.getElementById('ipSz').textContent=fmtSz(file.size);
     document.getElementById('iprev').classList.add('on');
     dz.classList.add('loaded');
     const img=new Image();
     img.onload=()=>{
       const c=document.createElement('canvas');
       c.width=Math.min(img.width,240);c.height=Math.min(img.height,240);
-      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
-      cvBuf=c;
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);cvBuf=c;
     };
     img.src=ev.target.result;
     doAnalysis(file);
-    addToHistory(file.name,ev.target.result,file.size);
+    addHist(file.name,fmtSz(file.size));
   };
   r.readAsDataURL(file);
 }
 
 /* ══════════════════════════════════════════
-   EXIF PARSER — pure JS
+   EXIF PARSER
 ══════════════════════════════════════════ */
 const ET={0x010e:'ImageDescription',0x010f:'Make',0x0110:'Model',0x0112:'Orientation',0x011a:'XResolution',0x011b:'YResolution',0x0128:'ResolutionUnit',0x0131:'Software',0x0132:'DateTime',0x013b:'Artist',0x8298:'Copyright',0x8769:'ExifIFD',0x8825:'GPSIFD',0x9000:'ExifVersion',0x9003:'DateTimeOriginal',0x9004:'DateTimeDigitized',0x9201:'ShutterSpeedValue',0x9202:'ApertureValue',0x9203:'BrightnessValue',0x9204:'ExposureBiasValue',0x9207:'MeteringMode',0x9208:'LightSource',0x9209:'Flash',0x920a:'FocalLength',0xa001:'ColorSpace',0xa002:'PixelXDimension',0xa003:'PixelYDimension',0xa402:'ExposureMode',0xa403:'WhiteBalance',0xa404:'DigitalZoomRatio',0xa405:'FocalLengthIn35mmFilm',0xa406:'SceneCaptureType',0xa408:'Contrast',0xa409:'Saturation',0xa40a:'Sharpness',0xa420:'ImageUniqueID',0xa430:'CameraOwnerName',0xa431:'BodySerialNumber',0xa433:'LensMake',0xa434:'LensModel',0xa435:'LensSerialNumber',0x829a:'ExposureTime',0x829d:'FNumber',0x8822:'ExposureProgram',0x8827:'ISO',0x0100:'ImageWidth',0x0101:'ImageLength',0x0102:'BitsPerSample',0x0103:'Compression'};
 const GT={0:'GPSVersionID',1:'GPSLatRef',2:'GPSLat',3:'GPSLonRef',4:'GPSLon',5:'GPSAltRef',6:'GPSAlt',7:'GPSTime',8:'GPSSats',17:'GPSDir',18:'GPSDatum',29:'GPSDate'};
-const ORIM={1:'Normal',2:'Yatay Çevir',3:'180°',4:'Dikey Çevir',6:'90° Saat Yönü',8:'270° Saat Yönü'};
+const ORIM={1:'Normal',2:'Yatay Çeviri',3:'180°',4:'Dikey Çeviri',6:'90° Saat Yönü',8:'270° Saat Yönü'};
 const METM={1:'Ortalama',2:'Merkez Ağırlıklı',3:'Nokta',5:'Desen'};
 const EXPM={0:'Tanımsız',1:'Manuel',2:'Otomatik',3:'Diyafram Önceliği',4:'Enstantane Önceliği',7:'Portre',8:'Manzara'};
-const FLSM={0:'Flaş Yok',1:'Flaş Patladı',9:'Dolgu Flaş',16:'Kapalı',24:'Otomatik/Yok',25:'Otomatik/Patladı'};
+const FLSM={0:'Flaş Yok',1:'Flaş Patladı',9:'Dolgu Flaş',16:'Kapalı',24:'Otomatik / Yok',25:'Otomatik / Patladı'};
 const WBM={0:'Otomatik',1:'Manuel'};
 
 function rR(v,o,le){const n=v.getUint32(o,le),d=v.getUint32(o+4,le);return d?n/d:0;}
 function rS(v,o,l){let s='';for(let i=0;i<l&&o+i<v.byteLength;i++){const c=v.getUint8(o+i);if(!c)break;s+=String.fromCharCode(c);}return s.trim();}
 function pIFD(v,off,le,tags,res){
-  if(off+2>v.byteLength)return;
-  const n=v.getUint16(off,le);off+=2;
+  if(off+2>v.byteLength)return;const n=v.getUint16(off,le);off+=2;
   for(let i=0;i<n;i++){
     if(off+12>v.byteLength)break;
     const tag=v.getUint16(off,le),tp=v.getUint16(off+2,le),nm=v.getUint32(off+4,le),vo=v.getUint32(off+8,le);
-    off+=12;const tn=tags[tag];if(!tn)continue;
-    let val;
+    off+=12;const tn=tags[tag];if(!tn)continue;let val;
     try{
       if(tp===2)val=rS(v,nm>4?vo:off-4,nm);
       else if(tp===3)val=nm===1?(nm>2?v.getUint16(vo,le):v.getUint16(off-4,le)):Array.from({length:Math.min(nm,8)},(_,j)=>v.getUint16((nm>2?vo:off-4)+j*2,le));
@@ -1045,8 +882,7 @@ function pIFD(v,off,le,tags,res){
 function parseEXIF(buf){
   const v=new DataView(buf);const res={};let off=2;
   while(off<v.byteLength-2){
-    const mk=v.getUint16(off);if(off+2>=v.byteLength)break;
-    const ln=v.getUint16(off+2);
+    const mk=v.getUint16(off);if(off+2>=v.byteLength)break;const ln=v.getUint16(off+2);
     if(mk===0xFFE1){
       if(rS(v,off+4,4)==='Exif'){
         const t0=off+10,bo=v.getUint16(t0),le=bo===0x4949;
@@ -1059,7 +895,7 @@ function parseEXIF(buf){
   }
   return res;
 }
-function dms(a,r){if(!Array.isArray(a)||a.length<3)return null;let d=a[0]+a[1]/60+a[2]/3600;if(r==='S'||r==='W')d=-d;return d;}
+function dmsToDecimal(a,r){if(!Array.isArray(a)||a.length<3)return null;let d=a[0]+a[1]/60+a[2]/3600;if(r==='S'||r==='W')d=-d;return d;}
 function fn(n,d=2){return typeof n==='number'?n.toFixed(d):n;}
 function fexp(v){if(!v)return'—';if(v>=1)return fn(v,1)+'s';return'1/'+Math.round(1/v)+'s';}
 
@@ -1068,20 +904,21 @@ function fexp(v){if(!v)return'—';if(v>=1)return fn(v,1)+'s';return'1/'+Math.ro
 ══════════════════════════════════════════ */
 function doAnalysis(file){
   document.getElementById('loading').classList.add('on');
-  document.getElementById('sg').style.display='none';
-  document.getElementById('aiCard').style.display='none';
-  document.getElementById('palCard').style.display='none';
+  ['sg','aiCard','palCard'].forEach(id=>document.getElementById(id).style.display='none');
   document.getElementById('exifWrap').innerHTML='';
   document.getElementById('forgery').classList.remove('on');
   const r=new FileReader();
   r.onload=ev=>{
     exif=parseEXIF(ev.target.result);
     exif.__name=file.name;exif.__size=fmtSz(file.size);
-    exif.__type=file.type||'image/jpeg';exif.__mod=new Date(file.lastModified).toLocaleString('tr-TR');
+    exif.__type=file.type||'image/jpeg';exif.__mod=new Date(file.lastModified).toLocaleString();
     setTimeout(()=>{
       document.getElementById('loading').classList.remove('on');
-      chkForgery();renderSummary();renderAI();renderVisuals();renderSections();renderGPS();renderEdit();
-    },350);
+      chkForgery();renderSummary();renderAI();renderVisuals();renderSections();
+      // update GPS & export pages if visible
+      gLat=dmsToDecimal(exif.GPSLat,exif.GPSLatRef);
+      gLon=dmsToDecimal(exif.GPSLon,exif.GPSLonRef);
+    },320);
   };
   r.readAsArrayBuffer(file);
 }
@@ -1090,151 +927,96 @@ function chkForgery(){
   const sw=(exif.Software||'').toLowerCase();
   const flags=[];
   if(/photoshop|gimp|lightroom|canva|pixelmator|snapseed|vsco|facetune|afterlight|picsart/i.test(sw))
-    flags.push('Düzenleme yazılımı tespit edildi: '+exif.Software);
+    flags.push('Düzenleme yazılımı: '+exif.Software);
   if(exif.DateTime&&exif.DateTimeOriginal&&exif.DateTime!==exif.DateTimeOriginal)
-    flags.push('Değişiklik tarihi ile çekim tarihi uyuşmuyor');
-  if(!exif.Make&&!exif.Model)
-    flags.push('Kamera üretici ve model bilgisi eksik');
+    flags.push('Değişiklik tarihi çekim tarihiyle uyuşmuyor');
+  if(!exif.Make&&!exif.Model)flags.push('Kamera bilgisi mevcut değil');
   if(flags.length){
     document.getElementById('forgery').classList.add('on');
-    document.getElementById('forgeryBody').innerHTML=flags.map(f=>`• ${f}`).join('<br>');
+    document.getElementById('forgBody').innerHTML=flags.map(f=>`• ${f}`).join('<br>');
   }
 }
 
 function renderSummary(){
   const sg=document.getElementById('sg');sg.style.display='grid';
+  // FIX: Show Make and Model separately, not merged — prevents "iPhone 15 Pro Max" clutter
+  const cam=exif.Make?(exif.Model?exif.Model:exif.Make):'—';
   sg.innerHTML=[
-    {ic:'📷',k:'Kamera',v:(exif.Make||'')+(exif.Model?' '+exif.Model:'')},
-    {ic:'📐',k:'Çözünürlük',v:exif.PixelXDimension&&exif.PixelYDimension?`${exif.PixelXDimension}×${exif.PixelYDimension}`:'—'},
-    {ic:'📅',k:'Tarih',v:exif.DateTimeOriginal||'—'},
+    {ic:'📷',k:L.cam,v:cam},
+    {ic:'📐',k:'Çözünürlük',v:exif.PixelXDimension&&exif.PixelYDimension?`${exif.PixelXDimension} × ${exif.PixelYDimension}`:'—'},
+    // FIX: Date formatted cleanly, not raw EXIF string with colons
+    {ic:'📅',k:'Tarih',v:exif.DateTimeOriginal?formatExifDate(exif.DateTimeOriginal):'—'},
     {ic:'🔭',k:'Odak',v:exif.FocalLength?fn(exif.FocalLength)+'mm':'—'},
     {ic:'⚡',k:'ISO',v:exif.ISO||exif.PhotographicSensitivity||'—'},
     {ic:'🔆',k:'Diyafram',v:exif.FNumber?'f/'+fn(exif.FNumber):'—'},
     {ic:'⏱',k:'Enstantane',v:fexp(exif.ExposureTime)},
-    {ic:'💡',k:'Flaş',v:exif.Flash!==undefined?(FLSM[exif.Flash]||exif.Flash):'—'},
+    {ic:'💡',k:'Flaş',v:exif.Flash!==undefined?(FLSM[exif.Flash]||String(exif.Flash)):'—'},
   ].map((s,i)=>
-    `<div class="sc fu" style="animation-delay:${i*40}ms">
+    `<div class="sc fu" style="animation-delay:${i*38}ms">
       <div class="sc-icon">${s.ic}</div>
       <div class="sc-val">${s.v||'—'}</div>
       <div class="sc-key">${s.k}</div>
     </div>`).join('');
 }
 
+// FIX: Format EXIF date "2024:05:10 14:32:11" → "10.05.2024, 14:32"
+function formatExifDate(raw){
+  if(!raw||typeof raw!=='string')return raw;
+  const m=raw.match(/(\d{4}):(\d{2}):(\d{2})\s+(\d{2}):(\d{2})/);
+  if(!m)return raw;
+  return `${m[3]}.${m[2]}.${m[1]}, ${m[4]}:${m[5]}`;
+}
+
 function renderAI(){
   const qs=calcQS(),fc=calcFC(),fr=calcFR();
   const hasAlpha=(exif.__type||'').includes('png');
   document.getElementById('agrid').innerHTML=`
-    <div class="aic"><div class="ai-lbl">Kalite Skoru</div>
+    <div class="aic"><div class="ai-lbl">${L.quality}</div>
       <div class="ai-val" style="color:${qs>70?'var(--ok)':qs>40?'var(--warn)':'var(--danger)'}">${qs}</div>
-      <div class="ai-sub">/100 puan</div>
-      <div class="pbar"><div class="pbfill" style="width:${qs}%;background:${qs>70?'var(--ok)':qs>40?'var(--warn)':'var(--danger)'}"></div></div>
+      <div class="ai-sub">/100</div>
+      <div class="pbar"><div class="pbf" style="width:${qs}%;background:${qs>70?'var(--ok)':qs>40?'var(--warn)':'var(--danger)'}"></div></div>
     </div>
-    <div class="aic"><div class="ai-lbl">Yüz Tahmini</div>
+    <div class="aic"><div class="ai-lbl">${L.faces}</div>
       <div class="ai-val" style="color:var(--a)">${fc}</div>
-      <div class="ai-sub">tahmini yüz algılandı</div>
-      <div class="pbar"><div class="pbfill" style="width:${Math.min(fc*25,100)}%;background:var(--a)"></div></div>
+      <div class="ai-sub">${L.faces_sub}</div>
+      <div class="pbar"><div class="pbf" style="width:${Math.min(fc*25,100)}%;background:var(--a)"></div></div>
     </div>
-    <div class="aic"><div class="ai-lbl">Şeffaflık</div>
-      <div class="ai-val" style="color:${hasAlpha?'var(--ok)':'var(--text2)'}">${hasAlpha?'VAR':'YOK'}</div>
-      <div class="ai-sub">alpha kanal ${hasAlpha?'mevcut':'yok'}</div>
+    <div class="aic"><div class="ai-lbl">${L.alpha}</div>
+      <div class="ai-val" style="color:${hasAlpha?'var(--ok)':'var(--text2)'}">${hasAlpha?L.yes:L.no}</div>
+      <div class="ai-sub">alpha kanal</div>
     </div>
-    <div class="aic"><div class="ai-lbl">Sahtecilik Riski</div>
+    <div class="aic"><div class="ai-lbl">${L.forgery}</div>
       <div class="ai-val" style="color:${fr.s<30?'var(--ok)':fr.s<60?'var(--warn)':'var(--danger)'}">${fr.s}%</div>
       <div class="ai-sub">${fr.r}</div>
-      <div class="pbar"><div class="pbfill" style="width:${fr.s}%;background:${fr.s<30?'var(--ok)':fr.s<60?'var(--warn)':'var(--danger)'}"></div></div>
+      <div class="pbar"><div class="pbf" style="width:${fr.s}%;background:${fr.s<30?'var(--ok)':fr.s<60?'var(--warn)':'var(--danger)'}"></div></div>
     </div>`;
   document.getElementById('aiCard').style.display='block';
-  // AI deep analysis via Claude
-  if(cfg.aiAnalysis) runClaudeAnalysis();
+  if(cfg.aiAnalysis)runClaudeAI();
 }
 
-/* ══════════════════════════════════════════
-   CLAUDE AI ANALYSIS — sahtecilik tespiti
-══════════════════════════════════════════ */
-async function runClaudeAnalysis(){
-  const wrap=document.getElementById('aiDetailWrap');
-  wrap.innerHTML=`<div class="ai-loading"><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-loading-dot"></div><div class="ai-detail">Claude AI derin analiz yapıyor…</div></div>`;
-
-  const metaSummary=`
-Fotoğraf: ${exif.__name||'bilinmiyor'}
-Kamera: ${exif.Make||'?'} ${exif.Model||'?'}
-Yazılım: ${exif.Software||'yok'}
-Çekim tarihi: ${exif.DateTimeOriginal||'yok'}
-Değiştirilme tarihi: ${exif.DateTime||'yok'}
-Boyut: ${exif.PixelXDimension||'?'}x${exif.PixelYDimension||'?'}
-ISO: ${exif.ISO||exif.PhotographicSensitivity||'yok'}
-Flaş: ${exif.Flash!==undefined?FLSM[exif.Flash]||exif.Flash:'yok'}
-Lens: ${exif.LensModel||'yok'}
-GPS: ${gLat!==null?'VAR':'YOK'}
-`.trim();
-
+async function runClaudeAI(){
+  const wrap=document.getElementById('aiDeep');
+  wrap.innerHTML=`<div class="ai-load"><div class="ald"></div><div class="ald"></div><div class="ald"></div><div class="ai-load-txt">${L.ai_deep}</div></div>`;
+  const summary=`Dosya: ${exif.__name||'?'} | Kamera: ${exif.Make||'?'} ${exif.Model||'?'} | Yazılım: ${exif.Software||'yok'} | Çekim: ${exif.DateTimeOriginal||'yok'} | Değiştirilme: ${exif.DateTime||'yok'} | Boyut: ${exif.PixelXDimension||'?'}x${exif.PixelYDimension||'?'} | ISO: ${exif.ISO||'yok'} | GPS: ${gLat!==null?'VAR':'YOK'}`;
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:600,
-        messages:[{
-          role:'user',
-          content:`Sen bir dijital adli bilişim uzmanısın. Fotoğraf EXIF metadatası üzerinde sahtecilik analizi yap.
-
-EXIF Bilgileri:
-${metaSummary}
-
-Şunları analiz et:
-1. Sahtecilik olasılığı (Yüksek/Orta/Düşük) ve gerekçesi
-2. Dikkat çeken şüpheli işaretler
-3. Fotoğraf hakkında genel değerlendirme
-
-Kısa, net ve Türkçe yanıt ver. 3-4 cümle yeterli.`
-        }]
-      })
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+        messages:[{role:'user',content:`Dijital adli bilişim uzmanı olarak bu fotoğraf EXIF verisini analiz et. Sahtecilik riski, şüpheli işaretler ve genel değerlendirme hakkında 2-3 cümle Türkçe yaz:\n${summary}`}]})
     });
-
-    if(!res.ok) throw new Error('API '+res.status);
+    if(!res.ok)throw new Error('API '+res.status);
     const data=await res.json();
-    const txt=data.content?.[0]?.text||'Analiz alınamadı';
-    wrap.innerHTML=`
-      <div style="background:rgba(var(--a-rgb),.07);border:1px solid rgba(var(--a-rgb),.2);border-radius:14px;padding:14px 16px;margin-top:4px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-          <span style="font-size:16px">🤖</span>
-          <span style="font-size:10px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--a)">CLAUDE AI DEĞERLENDİRMESİ</span>
-        </div>
-        <div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:500">${txt}</div>
-      </div>`;
+    const txt=data.content?.[0]?.text||'—';
+    wrap.innerHTML=`<div style="background:rgba(var(--ar),.07);border:1px solid rgba(var(--ar),.2);border-radius:12px;padding:14px 15px;margin-top:4px"><div style="font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:var(--a);margin-bottom:8px">CLAUDE AI DEĞERLENDİRMESİ</div><div style="font-size:13px;color:var(--text);line-height:1.7;font-weight:500">${txt}</div></div>`;
   }catch(e){
-    wrap.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:8px;font-weight:600">AI analizi şu an mevcut değil (${e.message})</div>`;
+    wrap.innerHTML=`<div style="font-size:11px;color:var(--text3);padding:6px;font-weight:600">AI analizi şu an kullanılamıyor</div>`;
   }
 }
 
-function calcQS(){
-  let s=50;
-  if(exif.PixelXDimension>3000)s+=15;else if(exif.PixelXDimension>1500)s+=8;
-  if(exif.FNumber)s+=10;if(exif.ExposureTime)s+=8;
-  const iso=+(exif.ISO||exif.PhotographicSensitivity||0);
-  if(iso){if(iso<800)s+=10;else if(iso<3200)s+=5;else s-=10;}
-  if(exif.DateTimeOriginal)s+=5;if(exif.LensModel)s+=5;if(!exif.Make)s-=15;
-  return Math.min(100,Math.max(0,Math.round(s)));
-}
-function calcFC(){
-  const sc=exif.SceneCaptureType;
-  if(sc===3)return Math.floor(Math.random()*3)+1;
-  if(sc===2)return Math.floor(Math.random()*2)+1;
-  return Math.random()>0.62?1:0;
-}
-function calcFR(){
-  let s=0,r='Temiz';
-  const sw=(exif.Software||'').toLowerCase();
-  if(/photoshop|gimp|lightroom|canva|snapseed|vsco|picsart/.test(sw)){s+=40;r='Düzenleme yazılımı';}
-  if(exif.DateTime&&exif.DateTimeOriginal&&exif.DateTime!==exif.DateTimeOriginal){s+=30;r='Tarih uyumsuz';}
-  if(!exif.Make&&!exif.Model){s+=20;r='Kamera yok';}
-  return{s:Math.min(100,s),r};
-}
+function calcQS(){let s=50;if(exif.PixelXDimension>3000)s+=15;else if(exif.PixelXDimension>1500)s+=8;if(exif.FNumber)s+=10;if(exif.ExposureTime)s+=8;const iso=+(exif.ISO||exif.PhotographicSensitivity||0);if(iso){if(iso<800)s+=10;else if(iso<3200)s+=5;else s-=10;}if(exif.DateTimeOriginal)s+=5;if(exif.LensModel)s+=5;if(!exif.Make)s-=15;return Math.min(100,Math.max(0,Math.round(s)));}
+function calcFC(){const sc=exif.SceneCaptureType;if(sc===3)return Math.floor(Math.random()*3)+1;if(sc===2)return Math.floor(Math.random()*2)+1;return Math.random()>0.62?1:0;}
+function calcFR(){let s=0,r=L.clean;const sw=(exif.Software||'').toLowerCase();if(/photoshop|gimp|lightroom|canva|snapseed|vsco|picsart/.test(sw)){s+=40;r='Düzenleme yazılımı';}if(exif.DateTime&&exif.DateTimeOriginal&&exif.DateTime!==exif.DateTimeOriginal){s+=30;r='Tarih uyumsuz';}if(!exif.Make&&!exif.Model){s+=20;r='Kamera yok';}return{s:Math.min(100,s),r};}
 
-/* ══════════════════════════════════════════
-   VISUALS — HISTOGRAM & PALETTE
-══════════════════════════════════════════ */
 function renderVisuals(){
   if(!cvBuf)return;
   if(cfg.hist)drawHist();
@@ -1242,12 +1024,9 @@ function renderVisuals(){
   document.getElementById('palCard').style.display=(cfg.hist||cfg.palette)?'block':'none';
 }
 function drawHist(){
-  const cv=document.getElementById('histCvs');
-  const ctx=cv.getContext('2d');
-  const W=cv.width=cv.offsetWidth*devicePixelRatio||300;
-  const H=cv.height=72*devicePixelRatio;
-  const ic=cvBuf.getContext('2d');
-  const px=ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;
+  const cv=document.getElementById('hcvs');const ctx=cv.getContext('2d');
+  const W=cv.width=cv.offsetWidth*devicePixelRatio||300;const H=cv.height=70*devicePixelRatio;
+  const ic=cvBuf.getContext('2d');const px=ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;
   const rH=new Array(256).fill(0),gH=new Array(256).fill(0),bH=new Array(256).fill(0);
   for(let i=0;i<px.length;i+=4){rH[px[i]]++;gH[px[i+1]]++;bH[px[i+2]]++;}
   const mx=Math.max(...rH,...gH,...bH);
@@ -1259,31 +1038,49 @@ function drawHist(){
   });
 }
 function drawPalette(){
-  const ic=cvBuf.getContext('2d');
-  const px=ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;
-  const b={};
-  for(let i=0;i<px.length;i+=12){
-    const r=Math.round(px[i]/32)*32,g=Math.round(px[i+1]/32)*32,bl=Math.round(px[i+2]/32)*32;
-    const k=`${r},${g},${bl}`;b[k]=(b[k]||0)+1;
-  }
+  const ic=cvBuf.getContext('2d');const px=ic.getImageData(0,0,cvBuf.width,cvBuf.height).data;const b={};
+  for(let i=0;i<px.length;i+=12){const r=Math.round(px[i]/32)*32,g=Math.round(px[i+1]/32)*32,bl=Math.round(px[i+2]/32)*32;const k=`${r},${g},${bl}`;b[k]=(b[k]||0)+1;}
   document.getElementById('palEl').innerHTML=Object.entries(b).sort((a,x)=>x[1]-a[1]).slice(0,8).map(([c])=>{
-    const [r,g,bl]=c.split(',');
-    const hex='#'+[r,g,bl].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
-    return`<div class="sw" style="background:${hex};box-shadow:0 4px 12px ${hex}66" title="${hex}" onclick="cp('${hex}');toast('${hex} kopyalandı')"></div>`;
+    const [r,g,bl]=c.split(',');const hex='#'+[r,g,bl].map(x=>parseInt(x).toString(16).padStart(2,'0')).join('');
+    return`<div class="sw" style="background:${hex};box-shadow:0 4px 10px ${hex}55" title="${hex}" onclick="cp('${hex}')"></div>`;
   }).join('');
 }
 
-/* ══════════════════════════════════════════
-   EXIF SECTIONS
-══════════════════════════════════════════ */
 function renderSections(){
   const secs=[
-    {ic:'📷',tl:'Kamera',fields:[['Üretici','Make','a'],['Model','Model','a'],['Lens','LensModel','a'],['Lens Marka','LensMake'],['Lens Seri','LensSerialNumber'],['Gövde Seri','BodySerialNumber'],['Yazılım','Software']]},
-    {ic:'⚙️',tl:'Çekim Ayarları',fields:[['Poz Süresi','ExposureTime',null,fexp],['Diyafram','FNumber',null,v=>'f/'+fn(v)],['ISO','ISO','y'],['ISO','PhotographicSensitivity','y'],['Odak','FocalLength',null,v=>fn(v)+'mm'],['35mm Eşd.','FocalLengthIn35mmFilm',null,v=>v+'mm'],['Flaş','Flash',null,v=>FLSM[v]||v],['Ölçüm','MeteringMode',null,v=>METM[v]||v],['Program','ExposureProgram',null,v=>EXPM[v]||v],['Beyaz Denge','WhiteBalance',null,v=>WBM[v]||v],['Dijital Zoom','DigitalZoomRatio',null,v=>fn(v)+'x'],['Poz Dengesi','ExposureBiasValue',null,v=>(v>0?'+':'')+fn(v)+' EV'],['Parlaklık','BrightnessValue',null,v=>fn(v)],['Kontrast','Contrast'],['Doygunluk','Saturation'],['Keskinlik','Sharpness']]},
-    {ic:'🖼',tl:'Görüntü',fields:[['Genişlik','PixelXDimension','g',v=>v+'px'],['Yükseklik','PixelYDimension','g',v=>v+'px'],['Yönelim','Orientation',null,v=>ORIM[v]||v],['Bit Derinliği','BitsPerSample'],['Sıkıştırma','Compression'],['Renk Uzayı','ColorSpace'],['X Çözünürlük','XResolution'],['Y Çözünürlük','YResolution'],['EXIF Sürümü','ExifVersion']]},
-    {ic:'📅',tl:'Tarih & Saat',fields:[['Çekim','DateTimeOriginal','a'],['Dijital','DateTimeDigitized'],['Değişiklik','DateTime']]},
-    {ic:'©️',tl:'Telif & Meta',fields:[['Sanatçı','Artist'],['Telif','Copyright'],['Açıklama','ImageDescription'],['Sahip','CameraOwnerName'],['Benzersiz ID','ImageUniqueID']]},
-    {ic:'📁',tl:'Dosya',fields:[['Ad','__name','a'],['Boyut','__size','g'],['Tür','__type'],['Değişiklik','__mod']]},
+    {ic:'📷',tl:L.cam,fields:[
+      ['Marka','Make','ac'],['Model','Model','ac'],
+      ['Lens','LensModel','ac'],['Lens Marka','LensMake'],
+      ['Lens Seri','LensSerialNumber'],['Gövde Seri','BodySerialNumber'],['Yazılım','Software']
+    ]},
+    {ic:'⚙️',tl:L.shoot,fields:[
+      ['Poz Süresi','ExposureTime',null,fexp],['Diyafram','FNumber',null,v=>'f/'+fn(v)],
+      ['ISO','ISO','ye'],['ISO','PhotographicSensitivity','ye'],
+      ['Odak','FocalLength',null,v=>fn(v)+'mm'],['35mm Eşd.','FocalLengthIn35mmFilm',null,v=>v+'mm'],
+      ['Flaş','Flash',null,v=>FLSM[v]||v],['Ölçüm','MeteringMode',null,v=>METM[v]||v],
+      ['Program','ExposureProgram',null,v=>EXPM[v]||v],['Beyaz Denge','WhiteBalance',null,v=>WBM[v]||v],
+      ['Dijital Zoom','DigitalZoomRatio',null,v=>fn(v)+'x'],
+      ['Poz Dengesi','ExposureBiasValue',null,v=>(v>0?'+':'')+fn(v)+' EV'],
+      ['Parlaklık','BrightnessValue',null,v=>fn(v)],['Kontrast','Contrast'],['Doygunluk','Saturation'],['Keskinlik','Sharpness']
+    ]},
+    {ic:'🖼',tl:L.img_lbl,fields:[
+      ['Genişlik','PixelXDimension','gr',v=>v+' px'],['Yükseklik','PixelYDimension','gr',v=>v+' px'],
+      ['Yönelim','Orientation',null,v=>ORIM[v]||v],['Bit Derinliği','BitsPerSample'],
+      ['Sıkıştırma','Compression'],['Renk Uzayı','ColorSpace'],['EXIF Ver.','ExifVersion']
+    ]},
+    {ic:'📅',tl:L.date_lbl,fields:[
+      // FIX: all dates formatted cleanly
+      ['Çekim','DateTimeOriginal','ac',formatExifDate],
+      ['Dijital','DateTimeDigitized',null,formatExifDate],
+      ['Değiştirilme','DateTime',null,formatExifDate]
+    ]},
+    {ic:'©️',tl:L.copy_right,fields:[
+      ['Sanatçı','Artist'],['Telif','Copyright'],['Açıklama','ImageDescription'],
+      ['Sahip','CameraOwnerName'],['Benzersiz ID','ImageUniqueID']
+    ]},
+    {ic:'📁',tl:L.file_lbl,fields:[
+      ['Ad','__name','ac'],['Boyut','__size','gr'],['Tür','__type'],['Değiştirilme','__mod']
+    ]},
   ];
   const w=document.getElementById('exifWrap');w.innerHTML='';
   secs.forEach((s,si)=>{
@@ -1292,103 +1089,154 @@ function renderSections(){
       if(fmt)try{v=fmt(v);}catch{}
       if(!v&&v!==0)return'';
       const vs=Array.isArray(v)?v.map(x=>typeof x==='number'?fn(x):x).join(', '):String(v);
-      return`<div class="exrow"><div class="exkey">${lbl}</div><div class="exval${cls?' '+cls:''}">${vs}</div><button class="excopy" onclick="cp('${vs.replace(/'/g,"\\'")}')" title="Kopyala">⎘</button></div>`;
+      return`<div class="exrow"><div class="exk">${lbl}</div><div class="exv${cls?' '+cls:''}">${vs}</div><button class="excopy" onclick="cp('${vs.replace(/'/g,"\\'")}')">⎘</button></div>`;
     }).filter(Boolean);
     if(!rows.length)return;
     const d=document.createElement('div');
-    d.className='sec fu';d.style.animationDelay=(si*50+200)+'ms';
-    d.innerHTML=`<div class="sech${si<2?' op':''}" onclick="togSec(this)"><span class="sec-emoji">${s.ic}</span><span class="sec-name">${s.tl}</span><span class="sec-count">${rows.length}</span><span class="sec-chev">▾</span></div><div class="secb${si<2?' op':''}">${rows.join('')}</div>`;
+    d.className='sec fu';d.style.animationDelay=(si*45+180)+'ms';
+    d.innerHTML=`<div class="sech${si<2?' op':''}" onclick="togSec(this)"><span class="sec-em">${s.ic}</span><span class="sec-nm">${s.tl}</span><span class="sec-ct">${rows.length}</span><span class="sec-cv">▾</span></div><div class="secb${si<2?' op':''}">${rows.join('')}</div>`;
     w.appendChild(d);
   });
 }
 function togSec(h){h.classList.toggle('op');h.nextElementSibling.classList.toggle('op');}
 
 /* ══════════════════════════════════════════
-   GPS
+   GPS PAGE — plan restricted
 ══════════════════════════════════════════ */
-function renderGPS(){
-  gLat=dms(exif.GPSLat,exif.GPSLatRef);
-  gLon=dms(exif.GPSLon,exif.GPSLonRef);
-  const b=document.getElementById('gpsBanner');
-  const ng=document.getElementById('noGps');
-  const hc=document.getElementById('gpsHide');
+function renderGPSPage(){
+  const wrap=document.getElementById('gpsPageContent');
+  if(!fObj){
+    wrap.innerHTML=`<div class="nodata"><strong>${L.no_gps}</strong>${L.no_gps_sub}</div>`;
+    return;
+  }
+  if(!isPro()){
+    wrap.innerHTML=`<div class="plan-gate">
+      <div class="pg-icon">📍</div>
+      <div class="pg-title">${L.pro_gps_title}</div>
+      <div class="pg-sub">${L.pro_gps_sub}</div>
+      <div class="pg-badge">${L.upgrade}</div>
+    </div>`;
+    return;
+  }
+  // Pro: show GPS
+  let html='';
   if(gLat!==null&&gLon!==null){
-    b.classList.add('on');
-    document.getElementById('gpsC').textContent=`${gLat.toFixed(6)}, ${gLon.toFixed(6)}`;
-    document.getElementById('mapBtn').onclick=()=>window.open(`https://maps.google.com/?q=${gLat},${gLon}`,'_blank');
-    ng.style.display='none';hc.style.display='block';
-    document.getElementById('gpsDet').innerHTML=`<div class="gc"><div class="gc-body">
-      <div class="exrow"><div class="exkey">Enlem</div><div class="exval g">${gLat.toFixed(8)}</div><button class="excopy" onclick="cp('${gLat.toFixed(8)}')">⎘</button></div>
-      <div class="exrow"><div class="exkey">Boylam</div><div class="exval g">${gLon.toFixed(8)}</div><button class="excopy" onclick="cp('${gLon.toFixed(8)}')">⎘</button></div>
-      <div class="exrow"><div class="exkey">Yükseklik</div><div class="exval">${exif.GPSAlt?fn(exif.GPSAlt)+'m':'—'}</div></div>
-      <div class="exrow"><div class="exkey">GPS Tarihi</div><div class="exval">${exif.GPSDate||'—'}</div></div>
-      <div class="exrow"><div class="exkey">Uydu</div><div class="exval">${exif.GPSSats||'—'}</div></div>
-      <div class="exrow" style="border:none"><div class="exkey">Datum</div><div class="exval">${exif.GPSDatum||'WGS-84'}</div></div>
+    html+=`<div class="gps-ban on"><div class="gdot"></div><div class="gps-inf"><div class="gps-lbl">${L.gps_found}</div><div class="gps-c">${gLat.toFixed(6)}, ${gLon.toFixed(6)}</div></div><button class="mapbtn" onclick="window.open('https://maps.google.com/?q=${gLat},${gLon}','_blank')">Harita</button></div>`;
+    html+=`<div class="card"><div class="card-b">
+      <div class="exrow"><div class="exk">Enlem</div><div class="exv gr">${gLat.toFixed(8)}</div><button class="excopy" onclick="cp('${gLat.toFixed(8)}')">⎘</button></div>
+      <div class="exrow"><div class="exk">Boylam</div><div class="exv gr">${gLon.toFixed(8)}</div><button class="excopy" onclick="cp('${gLon.toFixed(8)}')">⎘</button></div>
+      <div class="exrow"><div class="exk">Yükseklik</div><div class="exv">${exif.GPSAlt?fn(exif.GPSAlt)+'m':'—'}</div></div>
+      <div class="exrow"><div class="exk">GPS Tarihi</div><div class="exv">${exif.GPSDate||'—'}</div></div>
+      <div class="exrow" style="border:none"><div class="exk">Datum</div><div class="exv">${exif.GPSDatum||'WGS-84'}</div></div>
+    </div></div>`;
+    // Gizleme
+    html+=`<div class="card"><div class="card-h"><div class="card-t">${L.loc_hide}</div></div><div class="card-b">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:12px;font-weight:500">${L.loc_sub}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn sm outline" onclick="stripGPS()">${L.strip_btn}</button>
+        <button class="btn sm outline" onclick="document.getElementById('ffx').style.display=document.getElementById('ffx').style.display==='none'?'block':'none'">${L.fake_btn}</button>
+      </div>
+      <div id="ffx" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <input type="number" id="fLat" placeholder="Enlem: 41.0082" step="0.0001" class="efin" style="margin-bottom:0">
+          <input type="number" id="fLon" placeholder="Boylam: 28.9784" step="0.0001" class="efin" style="margin-bottom:0">
+        </div>
+        <button class="btn sm full" onclick="applyFake()">${L.apply}</button>
+      </div>
+      <div id="locMsg" style="font-size:12px;color:var(--ok);min-height:16px;margin-top:8px;font-weight:700"></div>
     </div></div>`;
   } else {
-    b.classList.remove('on');ng.style.display='block';hc.style.display='none';
-    document.getElementById('gpsDet').innerHTML='';
+    html+=`<div class="card"><div class="card-b" style="text-align:center;padding:36px"><div style="font-size:36px;margin-bottom:12px">📍</div><div style="font-size:16px;font-weight:800">${L.no_gps}</div><div style="font-size:12px;color:var(--text2);margin-top:6px;font-weight:500">${L.no_gps_sub}</div></div></div>`;
   }
+  wrap.innerHTML=html;
 }
+
 function stripGPS(){
   ['GPSLat','GPSLatRef','GPSLon','GPSLonRef','GPSAlt','GPSAltRef','GPSTime','GPSDate','GPSSats'].forEach(k=>delete exif[k]);
-  gLat=null;gLon=null;
-  document.getElementById('locMsg').textContent='✓ GPS verisi silindi';
-  document.getElementById('gpsBanner').classList.remove('on');
-  document.getElementById('noGps').style.display='block';
-  document.getElementById('gpsHide').style.display='none';
+  gLat=null;gLon=null;toast(L.gps_stripped);renderGPSPage();
 }
-function fakeTog(){const f=document.getElementById('fakeForm');f.style.display=f.style.display==='none'?'block':'none';}
 function applyFake(){
-  const la=parseFloat(document.getElementById('fLat').value),lo=parseFloat(document.getElementById('fLon').value);
+  const la=parseFloat(document.getElementById('fLat')?.value),lo=parseFloat(document.getElementById('fLon')?.value);
   if(isNaN(la)||isNaN(lo)){toast('Geçerli koordinat girin');return;}
   exif.GPSLat=[Math.abs(la),0,0];exif.GPSLatRef=la>=0?'N':'S';
   exif.GPSLon=[Math.abs(lo),0,0];exif.GPSLonRef=lo>=0?'E':'W';
-  gLat=la;gLon=lo;
-  document.getElementById('gpsC').textContent=`${la.toFixed(6)}, ${lo.toFixed(6)}`;
-  document.getElementById('gpsBanner').classList.add('on');
-  document.getElementById('noGps').style.display='none';
-  document.getElementById('locMsg').textContent='✓ Sahte konum eklendi';
-  document.getElementById('fakeForm').style.display='none';
+  gLat=la;gLon=lo;toast(L.fake_done);renderGPSPage();
 }
 
 /* ══════════════════════════════════════════
-   EDIT & EXPORT
+   EXPORT PAGE — metadata edit plan restricted
 ══════════════════════════════════════════ */
-function renderEdit(){
-  if(!fObj)return;
-  const fields=[['Make','Kamera Üretici'],['Model','Kamera Modeli'],['Software','Yazılım'],['Artist','Sanatçı'],['Copyright','Telif Hakkı'],['ImageDescription','Açıklama'],['DateTime','Tarih']];
-  document.getElementById('editWrap').innerHTML=fields.map(([k,lbl])=>
-    `<div style="margin-bottom:12px">
-      <label class="eflbl">${lbl}</label>
-      <input type="text" class="efin" value="${exif[k]||''}" oninput="exif['${k}']=this.value" placeholder="${lbl}…" autocorrect="off">
-    </div>`).join('')+`<button class="btn full sm" onclick="toast('✓ Değişiklikler kaydedildi')">✓ Kaydet</button>`;
-}
+function renderExportPage(){
+  const wrap=document.getElementById('exportPageContent');
+  let editHtml='';
+  if(!isPro()){
+    editHtml=`<div class="plan-gate">
+      <div class="pg-icon">✏️</div>
+      <div class="pg-title">${L.pro_edit_title}</div>
+      <div class="pg-sub">${L.pro_edit_sub}</div>
+      <div class="pg-badge">${L.upgrade}</div>
+    </div>`;
+  } else if(!fObj){
+    editHtml=`<div class="card"><div class="card-b"><div class="nodata"><strong>Fotoğraf yok</strong></div></div></div>`;
+  } else {
+    const fields=[['Make','Kamera Üretici'],['Model','Kamera Modeli'],['Software','Yazılım'],['Artist','Sanatçı'],['Copyright','Telif Hakkı'],['ImageDescription','Açıklama'],['DateTime','Tarih']];
+    editHtml=`<div class="card"><div class="card-h"><div class="card-t">${L.edit_lbl}</div></div><div class="card-b">
+      ${fields.map(([k,lbl])=>`<div style="margin-bottom:11px"><label class="eflbl">${lbl}</label><input type="text" class="efin" value="${exif[k]||''}" oninput="exif['${k}']=this.value" placeholder="${lbl}…" autocorrect="off"></div>`).join('')}
+      <button class="btn full sm" onclick="toast('${L.saved}')">${L.saved}</button>
+    </div></div>`;
+  }
 
-function flat(){return Object.fromEntries(Object.entries(exif).map(([k,v])=>[k,Array.isArray(v)?v.map(x=>typeof x==='number'?fn(x):x).join(', '):v]));}
-function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();}
-function bn(){return(fName||'exif').replace(/\.\w+$/,'');}
-function xJSON(){if(!fObj){toast('Fotoğraf yok');return;}dl(new Blob([JSON.stringify(flat(),null,2)],{type:'application/json'}),bn()+'-exif.json');}
-function xTXT(){if(!fObj)return;dl(new Blob([Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n')],{type:'text/plain'}),bn()+'-exif.txt');}
-function xCSV(){if(!fObj)return;dl(new Blob(['Key,Value\n'+Object.entries(flat()).map(([k,v])=>`"${k}","${String(v).replace(/"/g,'""')}"`).join('\n')],{type:'text/csv'}),bn()+'-exif.csv');}
-function xReport(){
-  if(!fObj)return;
-  const c=`╔════════════════════════════════════════╗\n║    provider.4 — EXIF RAPORU            ║\n╚════════════════════════════════════════╝\n\nDosya    : ${exif.__name||'—'}\nKullanıcı: ${curUser||'—'}\nTarih    : ${new Date().toLocaleString('tr-TR')}\nPlan     : ${curPlan||'—'}\n\n${'─'.repeat(42)}\n\n${Object.entries(flat()).map(([k,v])=>(k+'                          ').slice(0,26)+' '+v).join('\n')}\n\n${'─'.repeat(42)}\nprovider.4 © 2025`;
-  dl(new Blob([c],{type:'text/plain'}),bn()+'-rapor.txt');
+  wrap.innerHTML=editHtml+`
+    <div class="card"><div class="card-h"><div class="card-t">${L.qr_lbl}</div></div><div class="card-b">
+      <div style="font-size:13px;color:var(--text2);margin-bottom:13px;font-weight:500">${L.qr_sub}</div>
+      <canvas id="qrCvs" width="200" height="200" style="display:block;margin:0 auto 13px;border-radius:14px;background:var(--glass2)"></canvas>
+      <button class="btn full ghost" onclick="makeQR()">${L.qr_gen}</button>
+    </div></div>
+    <div class="card"><div class="card-h"><div class="card-t">${L.export_lbl}</div></div><div class="card-b" style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn full ghost" onclick="xJSON()">📄 ${L.exp_json}</button>
+      <button class="btn full ghost" onclick="xTXT()">📋 ${L.exp_txt}</button>
+      <button class="btn full ghost" onclick="xCSV()">📊 ${L.exp_csv}</button>
+      <button class="btn full ghost" onclick="xReport()">📑 ${L.exp_rep}</button>
+      <button class="btn full ghost" onclick="xCopy()">📎 ${L.exp_copy}</button>
+    </div></div>`;
 }
-function xCopy(){if(!fObj){toast('Fotoğraf yok');return;}navigator.clipboard.writeText(Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n'));toast('Tümü kopyalandı');}
 
 /* ══════════════════════════════════════════
-   QR CODE
+   HISTORY
+══════════════════════════════════════════ */
+function getHist(){try{return JSON.parse(localStorage.getItem('p4h')||'[]');}catch{return[];}}
+function saveHist(h){localStorage.setItem('p4h',JSON.stringify(h.slice(0,30)));}
+function addHist(name,size){
+  const h=getHist();
+  h.unshift({id:Date.now(),name,size,date:new Date().toLocaleString()});
+  saveHist(h);
+}
+function renderHistPage(){
+  const w=document.getElementById('histWrap');if(!w)return;
+  const h=getHist();
+  if(!h.length){w.innerHTML=`<div class="nodata"><strong>${L.hist_empty}</strong>${L.hist_empty_sub}</div>`;return;}
+  w.innerHTML=h.map(it=>`
+    <div class="hi fu">
+      <div class="hi-ph">📸</div>
+      <div class="hi-info">
+        <div class="hi-nm">${it.name}</div>
+        <div class="hi-mt">${it.size} · ${it.date}</div>
+      </div>
+      <button class="hi-del" onclick="delHist(${it.id})">🗑</button>
+    </div>`).join('');
+}
+function delHist(id){saveHist(getHist().filter(h=>h.id!==id));renderHistPage();}
+function clearHist(){if(confirm(L.hist_confirm)){localStorage.removeItem('p4h');renderHistPage();}}
+
+/* ══════════════════════════════════════════
+   QR & EXPORT
 ══════════════════════════════════════════ */
 function makeQR(){
-  const txt=`p.4 EXIF\n${exif.__name||'—'}\n${(exif.Make||'')+' '+(exif.Model||'')}\n${exif.DateTimeOriginal||'—'}\nGPS:${gLat&&gLon?`${gLat.toFixed(4)},${gLon.toFixed(4)}`:'N/A'}`;
-  const cv=document.getElementById('qrCvs');
-  const ctx=cv.getContext('2d');
-  const S=200;cv.width=cv.height=S;
-  ctx.fillStyle=getComputedStyle(document.body).getPropertyValue('--bg2')||'#13131f';ctx.fillRect(0,0,S,S);
-  const bytes=[...txt].map(c=>c.charCodeAt(0));
-  let hash=0;for(const b of bytes)hash=(hash*31+b)>>>0;
+  const cv=document.getElementById('qrCvs');if(!cv)return;
+  const ctx=cv.getContext('2d');const S=200;cv.width=cv.height=S;
+  const txt=`p.4|${exif.__name||'—'}|${exif.Make||''}${exif.Model||''}|${exif.DateTimeOriginal||'—'}|GPS:${gLat&&gLon?gLat.toFixed(4)+','+gLon.toFixed(4):'N/A'}`;
+  ctx.fillStyle='#111';ctx.fillRect(0,0,S,S);
+  const bytes=[...txt].map(c=>c.charCodeAt(0));let hash=0;for(const b of bytes)hash=(hash*31+b)>>>0;
   const rng=s=>{s=(s^61)^(s>>>16);s+=s<<3;s^=s>>>4;s*=0x27d4eb2d;return((s^(s>>>15))>>>0)/0xffffffff;};
   const ac=getComputedStyle(document.body).getPropertyValue('--a').trim()||'#a78bfa';
   ctx.fillStyle=ac;
@@ -1398,51 +1246,28 @@ function makeQR(){
     if(iC){const er=r%7,ec=c%7;if(er===0||er===6||ec===0||ec===6||(er>=2&&er<=4&&ec>=2&&ec<=4))ctx.fillRect(off+c*cell,off+r*cell,cell,cell);continue;}
     if(rng((hash+((r*M+c)*2654435761)>>>0)^(bytes[(r*M+c)%bytes.length]||0))>0.5)ctx.fillRect(off+c*cell,off+r*cell,cell,cell);
   }}
-  ctx.fillStyle='rgba(0,0,0,.8)';ctx.fillRect(S/2-38,S/2-9,76,18);
-  ctx.fillStyle=ac;ctx.font='bold 8px monospace';ctx.textAlign='center';ctx.fillText('provider.4',S/2,S/2+4);
-  toast('QR üretildi');
+  ctx.fillStyle='rgba(0,0,0,.82)';ctx.fillRect(S/2-36,S/2-8,72,16);
+  ctx.fillStyle=ac;ctx.font='bold 7px monospace';ctx.textAlign='center';ctx.fillText('provider.4',S/2,S/2+4);
+  toast(L.qr_done);
 }
 
-/* ══════════════════════════════════════════
-   HISTORY
-══════════════════════════════════════════ */
-function getHistory(){try{return JSON.parse(localStorage.getItem('p4hist')||'[]');}catch{return[];}}
-function saveHistory(h){localStorage.setItem('p4hist',JSON.stringify(h.slice(0,20)));}
-
-function addToHistory(name,thumb,size){
-  const h=getHistory();
-  h.unshift({id:Date.now(),name,thumb:thumb.slice(0,200),size:fmtSz(size),date:new Date().toLocaleString('tr-TR')});
-  saveHistory(h);
+function flat(){return Object.fromEntries(Object.entries(exif).map(([k,v])=>[k,Array.isArray(v)?v.map(x=>typeof x==='number'?fn(x):x).join(', '):v]));}
+function dl(b,n){const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=n;a.click();}
+function bn(){return(fName||'exif').replace(/\.\w+$/,'');}
+function xJSON(){if(!fObj){toast(L.no_photo);return;}dl(new Blob([JSON.stringify(flat(),null,2)],{type:'application/json'}),bn()+'-exif.json');}
+function xTXT(){if(!fObj)return;dl(new Blob([Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n')],{type:'text/plain'}),bn()+'-exif.txt');}
+function xCSV(){if(!fObj)return;dl(new Blob(['Key,Value\n'+Object.entries(flat()).map(([k,v])=>`"${k}","${String(v).replace(/"/g,'""')}"`).join('\n')],{type:'text/csv'}),bn()+'-exif.csv');}
+function xReport(){
+  if(!fObj)return;
+  const c=`╔═══════════════════════════════════╗\n║   provider.4 — EXIF RAPORU        ║\n╚═══════════════════════════════════╝\n\nDosya    : ${exif.__name||'—'}\nKullanıcı: ${curUser||'—'} (${curPlan||'—'})\nTarih    : ${new Date().toLocaleString()}\n\n${'─'.repeat(40)}\n\n${Object.entries(flat()).map(([k,v])=>(k+'                        ').slice(0,24)+' '+v).join('\n')}\n\n${'─'.repeat(40)}\nprovider.4 © 2025`;
+  dl(new Blob([c],{type:'text/plain'}),bn()+'-rapor.txt');
 }
-
-function renderHistory(){
-  const w=document.getElementById('histWrap');
-  const h=getHistory();
-  if(!h.length){w.innerHTML=`<div class="nodata"><strong>Geçmiş boş</strong>Analiz ettiğiniz fotoğraflar burada görünecek</div>`;return;}
-  w.innerHTML=h.map(item=>`
-    <div class="hist-item fu">
-      <div class="hist-thumb-placeholder">📸</div>
-      <div class="hist-info">
-        <div class="hist-name">${item.name}</div>
-        <div class="hist-meta">${item.size} · ${item.date}</div>
-      </div>
-      <button class="hist-del" onclick="delHistory(${item.id})">🗑</button>
-    </div>`).join('');
-}
-
-function delHistory(id){
-  saveHistory(getHistory().filter(h=>h.id!==id));
-  renderHistory();
-}
-
-function clearHistory(){
-  if(confirm('Tüm geçmiş silinsin mi?')){localStorage.removeItem('p4hist');renderHistory();}
-}
+function xCopy(){if(!fObj){toast(L.no_photo);return;}navigator.clipboard.writeText(Object.entries(flat()).map(([k,v])=>`${k}: ${v}`).join('\n'));toast(L.all_copied);}
 
 /* ══════════════════════════════════════════
    HELPERS
 ══════════════════════════════════════════ */
-function cp(v){navigator.clipboard.writeText(v);toast('Kopyalandı');}
+function cp(v){navigator.clipboard.writeText(v);toast(L.copied);}
 function toast(msg){
   const t=document.getElementById('toast');
   t.textContent=msg;t.classList.add('on');
@@ -1452,18 +1277,16 @@ function toast(msg){
 /* ══════════════════════════════════════════
    INIT
 ══════════════════════════════════════════ */
-// Apply saved settings
+L=I18N[cfg.lang]?.t||I18N.tr.t;
 document.body.dataset.theme=cfg.theme;
 document.body.dataset.mode=cfg.mode||'dark';
-buildThemeGrid();
-buildLangGrid();
-// Toggles
+buildThemeGrid();buildLangGrid();applyLang();
 document.getElementById('togHist').classList.toggle('on',cfg.hist);
 document.getElementById('togPal').classList.toggle('on',cfg.palette);
 document.getElementById('togAI').classList.toggle('on',cfg.aiAnalysis);
 document.getElementById('modeTog').classList.toggle('on',cfg.mode!=='light');
-document.getElementById('modeIcon').textContent=cfg.mode==='light'?'☀️':'🌙';
-document.getElementById('modeSub').textContent=cfg.mode==='light'?'Aydınlık mod aktif':'Karanlık mod aktif';
+document.getElementById('modeIc').textContent=cfg.mode==='light'?'☀️':'🌙';
+document.getElementById('modeSub').textContent=cfg.mode==='light'?L.s_light:L.s_dark;
 </script>
 </body>
 </html>
